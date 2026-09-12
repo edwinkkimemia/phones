@@ -260,6 +260,29 @@ async function main() {
     }).catch(() => null);
   }
   console.log("Seeded site settings.");
+
+  // Single source of truth top-up: guarantees every default ad exists with a
+  // distinct id (older inline blocks reused one id for two squares).
+  // update:{} — never overwrites admin edits.
+  const { ALL_DEFAULT_ADS } = await import("../src/data/default-ads");
+  let ensured = 0;
+  for (const a of ALL_DEFAULT_ADS) {
+    await prisma.adSlot.upsert({
+      where: { id: a.id },
+      update: {},
+      create: {
+        id: a.id,
+        title: a.title,
+        image: a.image,
+        link: a.link,
+        placement: a.placement as never,
+        target: a.target,
+        format: a.format as never,
+        sortOrder: a.sortOrder,
+      },
+    }).then(() => ensured++).catch(() => null);
+  }
+  console.log(`Ensured ${ensured}/${ALL_DEFAULT_ADS.length} default ads.`);
 }
 
 main().finally(() => prisma.$disconnect());
