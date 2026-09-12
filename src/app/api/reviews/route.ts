@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/admin-guard";
 
 export async function GET(req: Request) {
   const sp = new URL(req.url).searchParams;
@@ -25,6 +26,8 @@ export async function GET(req: Request) {
 const Body = z.object({
   productId: z.string(),
   name: z.string().min(2),
+  email: z.string().email().optional().or(z.literal("")),
+  phone: z.string().optional(),
   rating: z.number().int().min(1).max(5),
   title: z.string().optional(),
   body: z.string().min(4),
@@ -38,8 +41,39 @@ export async function POST(req: Request) {
       where: { OR: [{ id: parsed.data.productId }, { slug: parsed.data.productId }] },
     });
     if (!product) return NextResponse.json({ error: "Unknown product" }, { status: 400 });
+    // Auto-verify when the reviewer matches a real (non-cancelled) order.
+    let verified = false;
+    try {
+      const ors: { phone?: string | null }[] = [];
+      if (parsed.data.email) {
+        const c = await prisma.customer.findFirst({ where: { email: parsed.data.email } });
+        if (c) ors.push({ phone: c.phone });
+      }
+      if (parsed.data.phone) ors.push({ phone: parsed.data.phone.replace(/\s+/g, "") });
+      if (ors.length > 0) {
+        const hit = await prisma.order.findFirst({
+          where: {
+            status: { not: "CANCELLED" as never },
+            OR: ors.flatMap((o) =>
+              o.phone ? [{ phone: o.phone }, { customer: { phone: o.phone } }] : []
+            ),
+          },
+        });
+        verified = !!hit;
+      }
+    } catch {
+      /* verification is best-effort */
+    }
     const r = await prisma.review.create({
-      data: { productId: product.id, name: parsed.data.name, rating: parsed.data.rating, title: parsed.data.title, body: parsed.data.body, approved: false },
+      data: {
+        productId: product.id,
+        name: parsed.data.name,
+        rating: parsed.data.rating,
+        title: parsed.data.title,
+        body: parsed.data.body,
+        verified,
+        approved: false,
+      },
     });
     return NextResponse.json({ review: r, message: "Thanks! Your review is awaiting moderation." });
   } catch {
@@ -49,6 +83,8 @@ export async function POST(req: Request) {
 
 // ---- Admin moderation ----
 export async function PATCH(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const body = (await req.json().catch(() => null)) as { id?: string; approved?: boolean } | null;
   if (!body?.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {
@@ -75,6 +111,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {

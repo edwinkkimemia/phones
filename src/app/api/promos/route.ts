@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/admin-guard";
 
 // Admin promo-code management (PromoCode model).
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     const promos = await prisma.promoCode.findMany({ orderBy: { code: "asc" } });
     return NextResponse.json({ source: "db", promos });
@@ -22,6 +25,8 @@ const CreateBody = z.object({
 });
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const parsed = CreateBody.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid promo data" }, { status: 400 });
   try {
@@ -42,6 +47,8 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const body = (await req.json().catch(() => null)) as { id?: string; active?: boolean } | null;
   if (!body?.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {
@@ -56,6 +63,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {

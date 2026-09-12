@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { orderNumber } from "@/lib/utils";
 import { stkPush, normalizePhone } from "@/lib/mpesa";
 import { PRODUCTS } from "@/data/catalog";
+import { requireAdmin } from "@/lib/admin-guard";
 
 // ---- Customer + admin: list orders ----
 export async function GET(req: Request) {
@@ -39,6 +40,9 @@ export async function GET(req: Request) {
       });
       return NextResponse.json({ source: "db", orders });
     }
+    // Admin list below — customers use ?mine=1 above.
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const orders = await prisma.order.findMany({
       where: {
         ...(status ? { status: status as never } : {}),
@@ -168,7 +172,7 @@ export async function POST(req: Request) {
       data: {
         orderNumber: num, customerId: cust.id,
         ...(orderUserId ? { userId: orderUserId } : {}),
-        status: paymentMethod === "MPESA" ? "PENDING" : "PENDING",
+        status: "PENDING",
         paymentStatus: paymentMethod === "MPESA" ? "INITIATED" : "PENDING",
         paymentMethod: paymentMethod as never,
         subtotal, deliveryFee, discount, total,
@@ -188,6 +192,28 @@ export async function POST(req: Request) {
         },
       },
     });
+    // Decrement stock (best-effort — never fail the order over inventory).
+    await Promise.all(
+      lines
+        .filter((l) => l.dbId)
+        .map(async (l) => {
+          try {
+            const updated = await prisma.product.update({
+              where: { id: l.dbId as string },
+              data: { stockQty: { decrement: l.qty } },
+            });
+            await prisma.product.update({
+              where: { id: l.dbId as string },
+              data: {
+                stockStatus:
+                  updated.stockQty <= 0 ? "OUT_OF_STOCK" : updated.stockQty <= 8 ? "LOW_STOCK" : "IN_STOCK",
+              },
+            });
+          } catch {
+            /* out-of-sync inventory must not break checkout */
+          }
+        })
+    );
     return NextResponse.json({ orderNumber: order.orderNumber, total, stk });
   } catch {
     // Static fallback response (database unreachable)

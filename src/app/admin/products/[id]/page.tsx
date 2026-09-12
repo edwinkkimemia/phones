@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Trash2, X, ExternalLink, Plus } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const CATS = ["laptops", "desktops", "iphones", "smartphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "accessories", "gaming"];
 
@@ -129,8 +130,12 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </label>
               ))}
             </div>
-            <div className="sm:col-span-2"><label className="label">Description (rich text HTML)</label>
-              <textarea className="input min-h-[160px] font-mono !text-[13px]" value={String(form.description)} onChange={setF("description")} disabled={readonly} />
+            <div className="sm:col-span-2"><label className="label">Description (rich text)</label>
+              <RichTextEditor
+                value={String(form.description)}
+                onChange={(html) => setForm((f) => ({ ...f!, description: html }))}
+                disabled={readonly}
+              />
             </div>
             {!readonly && (
               <div className="sm:col-span-2">

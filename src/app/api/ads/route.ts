@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/admin-guard";
 
 // GET /api/ads?placement=CATEGORY|PRODUCT|GLOBAL&target=slug&format=WIDE|SQUARE&index=0
 // Exact match wins; falls back to GLOBAL. `index` picks the nth candidate (for stacked slots).
@@ -18,6 +19,8 @@ export async function GET(req: Request) {
 
   // Admin list view
   if (searchParams.get("list") === "all") {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     try {
       const ads = await prisma.adSlot.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] });
       return NextResponse.json({ source: "db", ads });
@@ -58,6 +61,8 @@ export async function GET(req: Request) {
 
 // Admin: list all slots
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const Body = z.object({
     title: z.string().min(3),
     image: z.string().url(),
@@ -77,6 +82,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {
@@ -103,6 +110,8 @@ export async function PATCH(req: Request) {
   });
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid ad update" }, { status: 400 });
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const { id, startsAt, endsAt, ...d } = parsed.data;
   try {
     const ad = await prisma.adSlot.update({

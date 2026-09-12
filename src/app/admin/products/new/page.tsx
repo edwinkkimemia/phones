@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, X, Plus, Trash2 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const CATS = ["laptops", "desktops", "iphones", "smartphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "accessories", "gaming"];
 
@@ -16,6 +17,10 @@ export default function NewProductPage() {
   });
   const [images, setImages] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
+  const [specs, setSpecs] = useState<{ group: string; key: string; value: string }[]>([
+    { group: "General", key: "Warranty", value: "1 Year" },
+  ]);
+  const [specDraft, setSpecDraft] = useState({ group: "General", key: "", value: "" });
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -37,6 +42,7 @@ export default function NewProductPage() {
           stockQty: Number(form.stockQty),
           brand: form.brand || undefined,
           images: images.length > 0 ? images : undefined,
+          specs: specs.filter((s) => s.key.trim() && s.value.trim()),
         }),
       });
       const data = await res.json();
@@ -91,8 +97,42 @@ export default function NewProductPage() {
           </div>
 
           <div className="card space-y-3 p-5">
-            <p className="font-extrabold">Description <span className="font-medium text-slate-400">(rich text — HTML allowed)</span></p>
-            <textarea className="input min-h-[140px] font-mono !text-[13px]" value={form.description} onChange={set("description")} placeholder="<p>…</p><ul><li>…</li></ul>" />
+            <p className="font-extrabold">Description</p>
+            <RichTextEditor value={form.description} onChange={(html) => setForm((f) => ({ ...f, description: html }))} placeholder="Sell it: key features, what's in the box, warranty…" />
+          </div>
+
+          <div className="card space-y-3 p-5">
+            <p className="font-extrabold">Specifications</p>
+            {specs.length > 0 && (
+              <ul className="space-y-1.5">
+                {specs.map((s, i) => (
+                  <li key={i} className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm">
+                    <span className="text-[11px] font-bold uppercase text-slate-400">{s.group}</span>
+                    <span className="font-semibold text-slate-600">{s.key}</span>
+                    <span className="flex-1 font-medium">{s.value}</span>
+                    <button type="button" onClick={() => setSpecs((sp) => sp.filter((_, x) => x !== i))} className="rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Remove spec">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="grid gap-2 sm:grid-cols-[130px_1fr_1fr_auto]">
+              <input className="input !py-2 text-xs" placeholder="Group" value={specDraft.group} onChange={(e) => setSpecDraft({ ...specDraft, group: e.target.value })} />
+              <input className="input !py-2 text-xs" placeholder="Key (e.g. RAM)" value={specDraft.key} onChange={(e) => setSpecDraft({ ...specDraft, key: e.target.value })} />
+              <input className="input !py-2 text-xs" placeholder="Value (e.g. 16GB)" value={specDraft.value} onChange={(e) => setSpecDraft({ ...specDraft, value: e.target.value })} />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!specDraft.key.trim() || !specDraft.value.trim()) return;
+                  setSpecs((sp) => [...sp, { ...specDraft }]);
+                  setSpecDraft({ group: specDraft.group, key: "", value: "" });
+                }}
+                className="btn-ghost !px-3 !py-2 text-xs"
+              >
+                <Plus className="h-4 w-4" /> Add
+              </button>
+            </div>
           </div>
         </div>
 

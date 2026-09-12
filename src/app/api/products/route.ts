@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PRODUCTS } from "@/data/catalog";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
+import { requireAdmin } from "@/lib/admin-guard";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -44,12 +45,15 @@ const CreateBody = z.object({
   condition: z.enum(["NEW", "PRE_OWNED", "REFURBISHED"]).default("NEW"),
   image: z.string().url().optional(),
   images: z.array(z.string().url()).max(8).optional(),
+  specs: z.array(z.object({ group: z.string().default("General"), key: z.string().min(1), value: z.string().min(1) })).max(30).optional(),
   isDeal: z.boolean().optional(),
   isNew: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const parsed = CreateBody.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid product data" }, { status: 400 });
   const d = parsed.data;
@@ -83,6 +87,9 @@ export async function POST(req: Request) {
             sortOrder: i,
           })),
         },
+        specs: d.specs?.length
+          ? { create: d.specs.map((s) => ({ group: s.group || "General", key: s.key, value: s.value })) }
+          : undefined,
       },
     });
     return NextResponse.json({ product: p });
@@ -110,6 +117,8 @@ const UpdateBody = z.object({
 });
 
 export async function PATCH(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const parsed = UpdateBody.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid update" }, { status: 400 });
   const { id, category, brand, ...d } = parsed.data;
@@ -144,6 +153,8 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   try {

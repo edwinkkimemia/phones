@@ -12,6 +12,7 @@ import {
   Minus,
   Plus,
   Heart,
+  Star,
 } from "lucide-react";
 import type { ProductT } from "@/types";
 import { Price, Rating, StockBadge, ConditionBadge } from "@/components/ui";
@@ -259,6 +260,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
             ))}
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Reviews are from verified purchases and moderated by our team.</p>
+          <ReviewForm productId={product.id} productName={product.name} />
         </div>
 
         <aside className="space-y-3">
@@ -294,5 +296,77 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
       </div>
     </div>
     </>
+  );
+}
+
+function ReviewForm({ productId, productName }: { productId: string; productName: string }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", rating: 5, title: "", body: "" });
+  const [msg, setMsg] = useState("");
+  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="btn-ghost mt-4 !py-2.5 text-xs">
+        ✎ Write a review
+      </button>
+    );
+  }
+  if (done) {
+    return <p className="card mt-4 border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{msg}</p>;
+  }
+
+  return (
+    <form
+      className="card mt-4 space-y-2.5 p-5"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setMsg("");
+        const res = await fetch("/api/reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, ...form }),
+        });
+        const data = await res.json().catch(() => ({}));
+        setBusy(false);
+        if (!res.ok) {
+          setMsg(data.error ?? "Failed — try again.");
+          return;
+        }
+        setDone(true);
+        setMsg(data.message ?? "Thanks! Your review is awaiting moderation.");
+      }}
+    >
+      <p className="font-extrabold">Review this product</p>
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-bold text-slate-500">Your rating:</span>
+        {[1, 2, 3, 4, 5].map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, rating: s }))}
+            aria-label={`${s} stars`}
+            className={s <= form.rating ? "text-amber-400" : "text-slate-200"}
+          >
+            <Star className="h-6 w-6 fill-current" />
+          </button>
+        ))}
+      </div>
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <input className="input" placeholder="Your name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+        <input className="input" placeholder="Headline (e.g. Genuine & fast)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <input className="input" type="email" placeholder="Email (for verified badge)" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <input className="input" placeholder="Phone used at checkout" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} inputMode="tel" />
+      </div>
+      <textarea className="input min-h-[90px]" placeholder={`What do you think of the ${productName}? *`} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
+      {msg && <p className="text-xs font-bold text-red-600">{msg}</p>}
+      <div className="flex gap-2">
+        <button disabled={busy} className="btn-primary !py-2.5 text-sm disabled:opacity-60">{busy ? "Sending…" : "Submit review"}</button>
+        <button type="button" onClick={() => setOpen(false)} className="btn-ghost !py-2.5 text-xs">Cancel</button>
+      </div>
+      <p className="text-[11px] text-slate-400">Bought here? Verified buyers get a ✓ badge after our team confirms your order.</p>
+    </form>
   );
 }
