@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Trash2 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
+import AdTargetInput from "@/components/AdTargetInput";
 
 interface Ad {
   id: string; title: string; image: string; link: string;
@@ -82,7 +83,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
           <div><label className="label">Title</label><input className="input" value={form.title} onChange={set("title")} /></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><label className="label">Link (where it goes)</label><input className="input" value={form.link} onChange={set("link")} placeholder="/deals" /></div>
-            <div><label className="label">Target slug</label><input className="input" value={form.target} onChange={set("target")} placeholder="slug or all" /></div>
+            <div><label className="label">Target slug</label><AdTargetInput placement={form.placement} value={form.target} onChange={(v) => setForm((f) => (f ? { ...f, target: v } : f))} /></div>
             <div><label className="label">Shows on</label>
               <select className="input" value={form.placement} onChange={set("placement")}>
                 <option value="GLOBAL">GLOBAL (everywhere)</option>

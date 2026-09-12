@@ -8,7 +8,7 @@ import { requireAdmin } from "@/lib/admin-guard";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const placement = (searchParams.get("placement") ?? "GLOBAL").toUpperCase();
-  const target = searchParams.get("target") ?? "all";
+  const target = (searchParams.get("target") ?? "all").trim().toLowerCase() || "all";
   const format = (searchParams.get("format") ?? "WIDE").toUpperCase();
   const index = Math.max(0, Number(searchParams.get("index") ?? 0) || 0);
 
@@ -49,9 +49,17 @@ export async function GET(req: Request) {
       ...live.filter((a) => a.placement === placement && a.target === "all"),
       ...live.filter((a) => a.placement === "GLOBAL"),
     ];
-    if (candidates.length > 0)
-      return NextResponse.json({ source: "db", ad: candidates[index % candidates.length] });
-    return NextResponse.json({ source: "db", ad: null });
+    const slim = (a: (typeof candidates)[number]) => ({
+      id: a.id, title: a.title, placement: a.placement, target: a.target, link: a.link,
+    });
+    if (candidates.length > 0) {
+      return NextResponse.json({
+        source: "db",
+        ad: candidates[index % candidates.length],
+        candidates: candidates.map(slim),
+      });
+    }
+    return NextResponse.json({ source: "db", ad: null, candidates: [] });
   } catch {
     return NextResponse.json({ source: "db", ad: null });
   }
@@ -88,6 +96,8 @@ export async function POST(req: Request) {
   });
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid ad data" }, { status: 400 });
+  // Normalize target: slugs are lowercase — "Laptops" must still match "laptops".
+  parsed.data.target = parsed.data.target.trim().toLowerCase() || "all";
   try {
     const ad = await prisma.adSlot.create({ data: { ...parsed.data, placement: parsed.data.placement as never, format: parsed.data.format as never } });
     return NextResponse.json({ ad });
@@ -128,6 +138,7 @@ export async function PATCH(req: Request) {
   const denied = await requireAdmin();
   if (denied) return denied;
   const { id, startsAt, endsAt, ...d } = parsed.data;
+  if (typeof d.target === "string") d.target = d.target.trim().toLowerCase() || "all";
   try {
     const ad = await prisma.adSlot.update({
       where: { id },

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
+import AdTargetInput from "@/components/AdTargetInput";
 
 export default function NewAdPage() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function NewAdPage() {
           <div><label className="label">Title *</label><input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Back-to-school laptop sale" required /></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><label className="label">Link (where it goes) *</label><input className="input" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/laptops" required /></div>
-            <div><label className="label">Target slug *</label><input className="input" value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} placeholder="slug, below-hero, or all" required /></div>
+            <div><label className="label">Target slug *</label><AdTargetInput placement={form.placement} value={form.target} onChange={(v) => setForm({ ...form, target: v })} /></div>
             <div><label className="label">Shows on</label>
               <select className="input" value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value })}>
                 <option value="GLOBAL">GLOBAL (everywhere)</option>
