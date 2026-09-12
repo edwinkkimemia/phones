@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Truck, MessageCircle, CreditCard, ShieldCheck, Star } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
+import { kes, savings } from "@/lib/utils";
+import { pickDaily } from "@/lib/rotation";
 import { CATEGORIES, PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
 import ProductCard from "@/components/ProductCard";
 import { Price } from "@/components/ui";
@@ -10,8 +12,15 @@ import { Price } from "@/components/ui";
 const heroBrands = ["HP", "Apple", "Samsung", "Lenovo", "Dell", "ASUS", "Xiaomi", "Tecno", "Anker", "JBL", "Oraimo", "Infinix"];
 
 export function Hero() {
-  const featured = PRODUCTS.find((p) => p.slug === "hp-probook-440-g10")!;
-  const iphone = PRODUCTS.find((p) => p.slug === "iphone-17-pro-256gb")!;
+  // The two feature spots rotate daily among featured products.
+  const [featured, second] = pickDaily(
+    PRODUCTS.filter((p) => p.isFeatured && p.stockStatus !== "OUT_OF_STOCK"),
+    2,
+    "hero"
+  );
+  const iphone = second ?? PRODUCTS.find((p) => p.slug === "iphone-17-pro-256gb")!;
+  const heroMain = featured ?? PRODUCTS[0];
+  const save = savings(heroMain.price, heroMain.compareAtPrice);
   return (
     <section className="relative overflow-hidden bg-ink-950 text-white">
       <Image
@@ -76,29 +85,35 @@ export function Hero() {
             <div className="card col-span-3 overflow-hidden !border-white/10 !bg-white/5 p-3 backdrop-blur">
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
                 <Image
-                  src={featured.images[0].url}
-                  alt={featured.name}
+                  src={heroMain.images[0].url}
+                  alt={heroMain.name}
                   fill
                   className="object-cover"
                   priority
                 />
-                <span className="absolute left-2 top-2 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-extrabold text-white">
-                  SAVE KES 8,000
-                </span>
+                {save !== null ? (
+                  <span className="absolute left-2 top-2 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-extrabold text-white">
+                    SAVE {kes(save)}
+                  </span>
+                ) : (
+                  <span className="absolute left-2 top-2 rounded-lg bg-brand-600 px-2 py-1 text-[11px] font-extrabold text-white">
+                    FEATURED
+                  </span>
+                )}
               </div>
-              <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-brand-300">{featured.brand} • Laptops</p>
-              <p className="truncate text-sm font-bold">{featured.name}</p>
-              <Price price={featured.price} compareAt={featured.compareAtPrice} size="sm" className="mt-1 [&_span]:!text-white" />
-              <Link href={`/laptops/${featured.slug}`} className="btn-primary mt-3 w-full !py-2.5 text-xs">Buy Now</Link>
+              <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-brand-300">{heroMain.brand} • {heroMain.categoryLabel}</p>
+              <p className="truncate text-sm font-bold">{heroMain.name}</p>
+              <Price price={heroMain.price} compareAt={heroMain.compareAtPrice} size="sm" className="mt-1 [&_span]:!text-white" />
+              <Link href={`/${heroMain.category}/${heroMain.slug}`} className="btn-primary mt-3 w-full !py-2.5 text-xs">Buy Now</Link>
             </div>
             <div className="col-span-2 flex flex-col gap-3">
               <div className="card float-y flex-1 overflow-hidden !border-white/10 !bg-white/5 p-3 backdrop-blur">
                 <div className="relative aspect-square overflow-hidden rounded-xl">
                   <Image src={iphone.images[0].url} alt={iphone.name} fill className="object-cover" />
                 </div>
-                <p className="mt-2 text-[11px] font-bold text-brand-300">NEW • iPhone 17 Pro</p>
-                <p className="text-xs font-bold">From KES 184,999</p>
-                <Link href={`/iphones/${iphone.slug}`} className="mt-2 block text-center rounded-lg bg-white/10 py-2 text-[11px] font-bold hover:bg-white/20">
+                <p className="mt-2 truncate text-[11px] font-bold text-brand-300">{iphone.isNew ? "NEW • " : ""}{iphone.brand} {iphone.categoryLabel}</p>
+                <p className="text-xs font-bold">{kes(iphone.price)}</p>
+                <Link href={`/${iphone.category}/${iphone.slug}`} className="mt-2 block text-center rounded-lg bg-white/10 py-2 text-[11px] font-bold hover:bg-white/20">
                   View
                 </Link>
               </div>

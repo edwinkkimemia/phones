@@ -12,13 +12,19 @@ import {
 import AdSlot from "@/components/AdSlot";
 import { PRODUCTS } from "@/data/catalog";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { shuffled, rotate } from "@/lib/rotation";
+
+// Re-render hourly so daily-rotated picks (hero features, showcases)
+// stay fresh without redeploying.
+export const revalidate = 3600;
 
 export default function HomePage() {
-  const laptops = PRODUCTS.filter((p) => p.category === "laptops");
-  const phones = PRODUCTS.filter((p) => p.category === "smartphones" || p.category === "iphones");
-  const accessories = PRODUCTS.filter((p) => p.category === "accessories");
-  const best = [...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount);
-  const fresh = PRODUCTS.filter((p) => p.isNew);
+  // Every section rotates daily — no two days show identical picks.
+  const laptops = shuffled(PRODUCTS.filter((p) => p.category === "laptops"), "home-laptops");
+  const phones = shuffled(PRODUCTS.filter((p) => p.category === "smartphones" || p.category === "iphones"), "home-phones");
+  const accessories = shuffled(PRODUCTS.filter((p) => p.category === "accessories"), "home-accessories");
+  const best = rotate([...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount), "home-best");
+  const fresh = shuffled(PRODUCTS.filter((p) => p.isNew), "home-new");
 
   return (
     <>
