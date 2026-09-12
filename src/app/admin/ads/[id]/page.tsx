@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Trash2 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdTargetInput from "@/components/AdTargetInput";
+import { probeImage } from "@/lib/image-probe";
 
 interface Ad {
   id: string; title: string; image: string; link: string;
@@ -20,6 +21,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
   const [form, setForm] = useState<Ad | null>(null);
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imgState, setImgState] = useState<"idle" | "checking" | "ok" | "bad">("idle");
 
   useEffect(() => {
     fetch("/api/ads?list=all")
@@ -47,6 +49,17 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
   const save = async () => {
     setSaving(true);
     setMsg("");
+    // Browser-level creative check — the exact load AdSlot will attempt.
+    if (form.image.trim()) {
+      setImgState("checking");
+      const ok = await probeImage(form.image);
+      setImgState(ok ? "ok" : "bad");
+      if (!ok) {
+        setSaving(false);
+        setMsg("That image URL doesn't load — fix the link or upload a creative before saving.");
+        return;
+      }
+    }
     const res = await fetch("/api/ads", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -127,7 +140,11 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
           <p className="font-extrabold">Creative</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {form.image && <img src={form.image} alt="" className={`w-full rounded-xl border border-slate-200 object-cover ${form.format === "SQUARE" ? "aspect-square" : "aspect-[4/1]"}`} />}
-          <div><label className="label">Image URL</label><input className="input font-mono !text-xs" value={form.image} onChange={set("image")} /></div>
+          <div><label className="label">Image URL</label><input className="input font-mono !text-xs" value={form.image} onChange={(e) => { set("image")(e); setImgState("idle"); }} onBlur={(e) => { if (e.target.value.trim()) probeImage(e.target.value).then((ok) => setImgState(ok ? "ok" : "bad")); }} />
+            {imgState === "checking" && <p className="mt-1 text-[11px] font-bold text-slate-400">Checking image…</p>}
+            {imgState === "ok" && <p className="mt-1 text-[11px] font-bold text-emerald-600">✓ Image loads.</p>}
+            {imgState === "bad" && <p className="mt-1 text-[11px] font-bold text-red-600">✗ Image doesn't load — fix the link or upload instead.</p>}
+          </div>
           <ImageUploader compact label="Upload new creative" onUploaded={(urls) => urls[0] && setForm((f) => (f ? { ...f, image: urls[0] } : f))} />
           <p className="text-[11px] leading-relaxed text-slate-400">WIDE shows ≈1216×176 desktop / 343×112 phones (upload 1920×400, centered). SQUARE shows ≈360×360 desktop / 165×165 phones (upload 1080×1080).</p>
         </div>

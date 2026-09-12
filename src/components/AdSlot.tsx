@@ -3,9 +3,30 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface AdT {
+  id?: string;
   title: string;
   image: string;
   link: string;
+}
+
+// Fire-and-forget delivery stat (never blocks render or navigation).
+function track(id: string | undefined, event: "impression" | "click") {
+  if (!id) return;
+  const payload = JSON.stringify({ id, event });
+  try {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: "application/json" });
+      if (navigator.sendBeacon("/api/ads/track", blob)) return;
+    }
+  } catch {
+    /* fall through to fetch */
+  }
+  fetch("/api/ads/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => null);
 }
 
 // Full-width (WIDE) image ad above breadcrumbs / between sections,
@@ -73,6 +94,11 @@ export default function AdSlot({
     };
   }, [placement, target, category, format, index]);
 
+  // Count a delivery each time a creative resolves for this slot.
+  useEffect(() => {
+    if (ad?.id) track(ad.id, "impression");
+  }, [ad?.id]);
+
   // No image (or a broken one) → render nothing instead of an empty frame.
   if (!ad || !ad.image || ad.image === badSrc) return null;
 
@@ -80,6 +106,7 @@ export default function AdSlot({
   const inner = (
     <a
       href={ad.link}
+      onClick={() => track(ad.id, "click")}
       {...(external ? { target: "_blank", rel: "noreferrer noopener" } : {})}
       className={cn(
         "group relative block overflow-hidden rounded-2xl border border-slate-200 shadow-[0_1px_2px_rgba(16,24,40,.06),0_8px_24px_-12px_rgba(16,24,40,.18)]",

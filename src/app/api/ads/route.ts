@@ -84,6 +84,34 @@ export async function GET(req: Request) {
   }
 }
 
+// Server-side creative check: HEAD the image URL (falling back to a
+// ranged GET for hosts that reject HEAD). Definitive HTTP failures (4xx/5xx)
+// reject the save; network-level uncertainty allows it — the admin form's
+// browser probe is the authoritative load test.
+async function verifyImageUrl(url: string): Promise<{ ok: boolean; status?: number }> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    let res = await fetch(url, { method: "HEAD", redirect: "follow", signal: ctrl.signal });
+    if (!res.ok && (res.status === 403 || res.status === 405)) {
+      res = await fetch(url, {
+        method: "GET",
+        headers: { Range: "bytes=0-0" },
+        redirect: "follow",
+        signal: ctrl.signal,
+      });
+    }
+    if (res.ok) return { ok: true };
+    // Definitive failure only on client/server error responses.
+    if (res.status >= 400) return { ok: false, status: res.status };
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Admin: list all slots
 export async function POST(req: Request) {
   const denied = await requireAdmin();
@@ -118,6 +146,12 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid ad data" }, { status: 400 });
   // Normalize target: slugs are lowercase — "Laptops" must still match "laptops".
   parsed.data.target = parsed.data.target.trim().toLowerCase() || "all";
+  const check = await verifyImageUrl(parsed.data.image);
+  if (!check.ok)
+    return NextResponse.json(
+      { error: `That image URL doesn't load (HTTP ${check.status ?? "error"}) — fix the link or upload a creative.` },
+      { status: 400 }
+    );
   try {
     const ad = await prisma.adSlot.create({ data: { ...parsed.data, placement: parsed.data.placement as never, format: parsed.data.format as never } });
     return NextResponse.json({ ad });
@@ -159,6 +193,14 @@ export async function PATCH(req: Request) {
   if (denied) return denied;
   const { id, startsAt, endsAt, ...d } = parsed.data;
   if (typeof d.target === "string") d.target = d.target.trim().toLowerCase() || "all";
+  if (typeof d.image === "string") {
+    const check = await verifyImageUrl(d.image);
+    if (!check.ok)
+      return NextResponse.json(
+        { error: `That image URL doesn't load (HTTP ${check.status ?? "error"}) — fix the link or upload a creative.` },
+        { status: 400 }
+      );
+  }
   try {
     const ad = await prisma.adSlot.update({
       where: { id },

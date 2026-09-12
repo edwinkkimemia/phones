@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdTargetInput from "@/components/AdTargetInput";
+import { probeImage } from "@/lib/image-probe";
 
 export default function NewAdPage() {
   const router = useRouter();
@@ -19,11 +20,29 @@ export default function NewAdPage() {
   });
   const [msg, setMsg] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imgState, setImgState] = useState<"idle" | "checking" | "ok" | "bad">("idle");
+
+  const checkImage = async (url: string) => {
+    if (!url.trim()) {
+      setImgState("idle");
+      return false;
+    }
+    setImgState("checking");
+    const ok = await probeImage(url);
+    setImgState(ok ? "ok" : "bad");
+    return ok;
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setMsg("");
+    // Browser-level creative check — the exact load AdSlot will attempt.
+    if (!(await checkImage(form.image))) {
+      setSaving(false);
+      setMsg("That image URL doesn't load — fix the link or upload a creative before publishing.");
+      return;
+    }
     try {
       const res = await fetch("/api/ads", {
         method: "POST",
@@ -77,7 +96,7 @@ export default function NewAdPage() {
             <div><label className="label">Priority (lowest wins ties)</label><input className="input" type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} /></div>
           </div>
           <button disabled={saving} className="btn-primary !py-3 text-sm disabled:opacity-60">
-            {saving ? "Publishing…" : "Publish ad"}
+            {saving ? (imgState === "checking" ? "Checking image…" : "Publishing…") : "Publish ad"}
           </button>
           {msg && <p className="text-xs font-bold text-red-600">{msg}</p>}
         </div>
@@ -90,7 +109,20 @@ export default function NewAdPage() {
           ) : (
             <div className="grid aspect-[4/1] place-items-center rounded-xl bg-slate-50 text-xs text-slate-400">Preview appears here</div>
           )}
-          <div><label className="label">Image URL *</label><input className="input font-mono !text-xs" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://…" required /></div>
+          <div>
+            <label className="label">Image URL *</label>
+            <input
+              className="input font-mono !text-xs"
+              value={form.image}
+              onChange={(e) => { setForm({ ...form, image: e.target.value }); setImgState("idle"); }}
+              onBlur={(e) => { if (e.target.value.trim()) checkImage(e.target.value); }}
+              placeholder="https://…"
+              required
+            />
+            {imgState === "checking" && <p className="mt-1 text-[11px] font-bold text-slate-400">Checking image…</p>}
+            {imgState === "ok" && <p className="mt-1 text-[11px] font-bold text-emerald-600">✓ Image loads.</p>}
+            {imgState === "bad" && <p className="mt-1 text-[11px] font-bold text-red-600">✗ Image doesn't load — fix the link or upload instead.</p>}
+          </div>
           <ImageUploader compact label="…or upload creative" onUploaded={(urls) => urls[0] && setForm((f) => ({ ...f, image: urls[0] }))} />
           <p className="text-[11px] leading-relaxed text-slate-400">WIDE displays ≈1216×176 desktop / 343×112 phones — upload 1920×400, keep text centered (edges crop). SQUARE displays ≈360×360 desktop / 165×165 phones — upload 1080×1080.</p>
         </div>

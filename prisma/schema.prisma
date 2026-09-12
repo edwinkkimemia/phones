@@ -386,4 +386,8 @@ model AdSlot {
   startsAt  DateTime?
   endsAt    DateTime?
   createdAt DateTime    @default(now())
+  // Delivery stats (incremented by POST /api/ads/track, shown in /admin → Ads & Banners).
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  lastShownAt DateTime?
 }

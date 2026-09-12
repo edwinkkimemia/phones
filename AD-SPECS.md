@@ -55,3 +55,11 @@ and in the sidebar on blog articles and buying guides.
 - **Priority** — lowest number wins when several ads match the same slot.
 - Exact matches beat wildcards (`all`), which beat GLOBAL.
 - Use **Pause** instead of delete for seasonal creatives you will reuse.
+- **Images must load** — the new/edit form checks the creative URL before
+  publishing (and the API re-checks on save). Prefer uploading; external
+  hotlinks rot. **Live slot previews** on the Ads page show every key slot
+  as shoppers see it — a broken badge there means fix that creative.
+- **Performance** — every render and click is counted. The report flags
+  live ads with zero impressions (nothing resolves to them — check
+  placement/target/format/schedule) and ads with impressions but zero
+  clicks (weak creative or landing page).
