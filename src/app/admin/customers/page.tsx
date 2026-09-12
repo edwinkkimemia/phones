@@ -21,7 +21,7 @@ export default function AdminCustomers() {
   return (
     <div>
       <h1 className="section-title !text-2xl">Customers</h1>
-      <p className="text-xs text-slate-500">{shown.length} profiles • Source: {source === "db" ? "Live database" : "Demo (connect DB)"}</p>
+      <p className="text-xs text-slate-500">{shown.length} profiles • {source === "db" ? "Live database" : "Offline"}</p>
       <input className="input mt-3" placeholder="Search name, phone, email…" value={q} onChange={(e) => setQ(e.target.value)} />
       <div className="card mt-3 overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">

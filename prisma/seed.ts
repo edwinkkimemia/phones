@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { PRODUCTS, CATEGORIES, BRANDS } from "../src/data/catalog";
 
 const prisma = new PrismaClient();
@@ -170,6 +171,84 @@ async function main() {
   } catch (e) {
     console.log("Skipping ad slots (run prisma migrate first).");
   }
+
+  // Per-category banners so every category page shows its own creative
+  try {
+    const img = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1600&q=80`;
+    const catAds: { slug: string; title: string; image: string }[] = [
+      { slug: "laptops", title: "Laptop deals from KES 42,999", image: img("photo-1496181133206-80ce9b88a853") },
+      { slug: "desktops", title: "Desktops for office & studio", image: img("photo-1547082299-de196ea013d6") },
+      { slug: "iphones", title: "iPhone 17 Pro — now in stock", image: img("photo-1592750475338-74b7b21085ab") },
+      { slug: "smartphones", title: "Samsung, Xiaomi, Tecno & more", image: img("photo-1511707171634-5f897ff02aa9") },
+      { slug: "phones", title: "Phones & iPhones Kenyans love", image: img("photo-1511707171634-5f897ff02aa9") },
+      { slug: "tablets", title: "Tablets for work, study & play", image: img("photo-1544244015-0df4b3ffc6b0") },
+      { slug: "wearables", title: "Smartwatches from KES 5,999", image: img("photo-1579586337278-3befd40fd17a") },
+      { slug: "storage", title: "Storage upgrades from KES 2,499", image: img("photo-1597872200969-2b65d56bd16b") },
+      { slug: "laptop-bags", title: "Padded, anti-theft laptop bags", image: img("photo-1491637639811-60e2756cc1c7") },
+      { slug: "laptop-parts", title: "Genuine RAM, batteries & chargers", image: img("photo-1518770660439-4636190af475") },
+      { slug: "phone-parts", title: "Original screens & batteries", image: img("photo-1601784551446-20c9e07cdbdb") },
+      { slug: "accessories", title: "Chargers, audio & more from KES 2,499", image: img("photo-1572569511254-d8f925fe2cbb") },
+      { slug: "gaming", title: "Gaming rigs & peripherals", image: img("photo-1593305841991-05c297ba4575") },
+      { slug: "deals", title: "Today's Tech Deals — save up to 20%", image: img("photo-1607083206869-4c7672e72a8a") },
+      { slug: "new-arrivals", title: "Just landed — the newest tech", image: img("photo-1592750475338-74b7b21085ab") },
+      { slug: "best-sellers", title: "What Kenya is buying right now", image: img("photo-1511707171634-5f897ff02aa9") },
+    ];
+    for (const c of catAds) {
+      await prisma.adSlot.upsert({
+        where: { id: `cat-${c.slug}` },
+        update: { title: c.title, image: c.image, link: `/${c.slug}` },
+        create: {
+          id: `cat-${c.slug}`,
+          title: c.title,
+          image: c.image,
+          link: `/${c.slug}`,
+          placement: "CATEGORY" as never,
+          target: c.slug,
+          format: "WIDE" as never,
+          sortOrder: 0,
+        },
+      });
+    }
+    console.log(`Seeded ${catAds.length} category ads.`);
+  } catch {
+    console.log("Skipping category ads (run prisma migrate first).");
+  }
+
+  // Live promo codes (validated at checkout — no hardcoded demo codes)
+  for (const pc of [
+    { code: "TECH10", type: "PERCENTAGE", value: 10, minSubtotal: 10000 },
+    { code: "FLAT500", type: "FIXED", value: 500, minSubtotal: 5000 },
+  ]) {
+    await prisma.promoCode.upsert({
+      where: { code: pc.code },
+      update: { type: pc.type as never, value: pc.value, minSubtotal: pc.minSubtotal, active: true },
+      create: { code: pc.code, type: pc.type as never, value: pc.value, minSubtotal: pc.minSubtotal, active: true },
+    }).catch(() => null);
+  }
+  console.log("Seeded promo codes.");
+
+  // Admin login (email + password). Set ADMIN_EMAIL / ADMIN_PASSWORD env vars;
+  // defaults below must be changed after first login.
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@phonelaptops.co.ke";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: { role: "ADMIN" as never },
+    create: { name: "Store Admin", email: adminEmail, passwordHash, role: "ADMIN" as never },
+  }).catch(() => console.log("Skipping admin user (run prisma migrate first)."));
+  console.log(`Admin login ready: ${adminEmail}${process.env.ADMIN_PASSWORD ? "" : " (default password — change it!)"}`);
+
+  // Site settings defaults (editable from /admin → Settings)
+  const { SITE_DEFAULTS } = await import("../src/lib/site-settings");
+  for (const [key, value] of Object.entries(SITE_DEFAULTS)) {
+    await prisma.siteSetting.upsert({
+      where: { key },
+      update: {},
+      create: { key, value },
+    }).catch(() => null);
+  }
+  console.log("Seeded site settings.");
 }
 
 main().finally(() => prisma.$disconnect());

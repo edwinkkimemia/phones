@@ -8,13 +8,7 @@ export async function GET() {
     const promos = await prisma.promoCode.findMany({ orderBy: { code: "asc" } });
     return NextResponse.json({ source: "db", promos });
   } catch {
-    return NextResponse.json({
-      source: "static",
-      promos: [
-        { id: "static-1", code: "TECH10", type: "PERCENTAGE", value: 10, minSubtotal: 10000, active: true, usedCount: 0 },
-        { id: "static-2", code: "FLAT500", type: "FIXED", value: 500, minSubtotal: 5000, active: true, usedCount: 0 },
-      ],
-    });
+    return NextResponse.json({ source: "db", promos: [] });
   }
 }
 
@@ -43,7 +37,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ promo });
   } catch {
-    return NextResponse.json({ error: "Connect the database to manage promos (demo mode is read-only)." }, { status: 503 });
+    return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
   }
 }
 

@@ -9,7 +9,6 @@ const SOCIALS = [
   { label: "X (Twitter)", href: "https://x.com/phonelaptopske", Icon: Twitter },
   { label: "YouTube", href: "https://youtube.com/@phonelaptopske", Icon: Youtube },
   { label: "TikTok", href: "https://tiktok.com/@phonelaptopske", Icon: TikTokIcon },
-  { label: "WhatsApp", href: "https://wa.me/254715135141", Icon: WhatsAppIcon },
 ];
 
 const COLS: { title: string; links: { label: string; href: string }[] }[] = [
@@ -52,7 +51,13 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
   },
 ];
 
-export default function Footer() {
+export default function Footer({ settings }: { settings?: Record<string, string> }) {
+  const phone = settings?.phone_display ?? "+254 715 135 141";
+  const waDisplay = settings?.whatsapp_display ?? "0715 135 141";
+  const waNumber = settings?.whatsapp_number ?? "254715135141";
+  const email = settings?.email ?? "support@phonelaptops.co.ke";
+  const address = settings?.address ?? "Moi Avenue, Nairobi, Kenya";
+  const tagline = settings?.tagline ?? "Latest Gadgets. Better Living.";
   return (
     <footer className="bg-ink-950 text-slate-300">
       <div className="container-x grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -70,7 +75,7 @@ export default function Footer() {
                 PhoneLaptops<span className="text-accent">.co.ke</span>
               </span>
               <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Latest Gadgets. Better Living.
+                {tagline}
               </span>
             </span>
           </Link>
@@ -79,10 +84,10 @@ export default function Footer() {
             tech. Honest prices. Delivered.
           </p>
           <div className="mt-5 space-y-2 text-sm">
-            <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-accent" /> +254 715 135 141</p>
-            <p className="flex items-center gap-2"><WhatsAppIcon className="h-4 w-4 text-accent" /> WhatsApp: 0715 135 141</p>
-            <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-accent" /> support@phonelaptops.co.ke</p>
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" /> Moi Avenue, Nairobi, Kenya</p>
+            <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-accent" /> {phone}</p>
+            <p className="flex items-center gap-2"><WhatsAppIcon className="h-4 w-4 text-accent" /> WhatsApp: {waDisplay}</p>
+            <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-accent" /> {email}</p>
+            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" /> {address}</p>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             {SOCIALS.map(({ label, href, Icon }) => (
@@ -98,6 +103,16 @@ export default function Footer() {
                 <Icon className="h-4 w-4" />
               </a>
             ))}
+            <a
+              href={`https://wa.me/${waNumber}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp"
+              title="WhatsApp"
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/10 transition hover:bg-white/20"
+            >
+              <WhatsAppIcon className="h-4 w-4" />
+            </a>
           </div>
           <p className="mt-3 text-xs text-slate-500">@phonelaptopske everywhere</p>
         </div>

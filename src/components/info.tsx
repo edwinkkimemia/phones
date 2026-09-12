@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Truck, ShieldCheck, RotateCcw, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
+import { faqJsonLd } from "@/lib/seo";
 
 function Shell({ title, kicker, children }: { title: string; kicker: string; children: React.ReactNode }) {
   return (
@@ -87,6 +88,7 @@ export function FaqPage() {
   ];
   return (
     <Shell title="Frequently Asked Questions" kicker="FAQs">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }} />
       {faqs.map(([q, a]) => (
         <div key={q}>
           <p className="font-bold text-slate-900">{q}</p>

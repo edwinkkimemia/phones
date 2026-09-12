@@ -26,7 +26,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
       .then((d) => {
         const hit = (d.ads ?? []).find((a: Ad) => a.id === params.id);
         if (hit) setForm({ ...hit, format: hit.format ?? "WIDE", sortOrder: hit.sortOrder ?? 0 });
-        else setMsg("Ad not found (demo ads can't be edited — connect the database).");
+        else setMsg("Ad not found.");
       })
       .catch(() => setMsg("Failed to load"));
   }, [params.id]);

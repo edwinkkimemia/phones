@@ -8,14 +8,7 @@ export async function GET() {
     const zones = await prisma.deliveryZone.findMany({ orderBy: { fee: "asc" } });
     return NextResponse.json({ source: "db", zones });
   } catch {
-    return NextResponse.json({
-      source: "static",
-      zones: [
-        { id: "s1", county: "Nairobi", town: "Nairobi CBD & environs", fee: 250, eta: "Same-day / Next-day", active: true },
-        { id: "s2", county: "Mombasa", town: "Mombasa", fee: 450, eta: "1–2 days", active: true },
-        { id: "s3", county: "Other", town: "Other towns (G4S / Fargo)", fee: 500, eta: "2–3 days", active: true },
-      ],
-    });
+    return NextResponse.json({ source: "db", zones: [] });
   }
 }
 
@@ -33,7 +26,7 @@ export async function POST(req: Request) {
     const zone = await prisma.deliveryZone.create({ data: parsed.data });
     return NextResponse.json({ zone });
   } catch {
-    return NextResponse.json({ error: "Connect the database to manage zones (demo mode is read-only)." }, { status: 503 });
+    return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
   }
 }
 

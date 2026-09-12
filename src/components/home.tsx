@@ -387,32 +387,6 @@ export function DeliverySection() {
   );
 }
 
-export function NewsletterCTA() {
-  return (
-    <section className="container-x pb-14">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-700 via-brand-600 to-ink-950 p-8 text-white md:p-12">
-        <div className="relative max-w-xl">
-          <h2 className="font-display text-2xl font-extrabold sm:text-3xl">Get deal alerts on WhatsApp</h2>
-          <p className="mt-2 text-sm text-blue-100">
-            Flash deals sell out fast. Join 20,000+ Kenyans getting price drops first. No spam — unsubscribe anytime.
-          </p>
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-            <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254715135141"}?text=${encodeURIComponent("Hi! Add me to PhoneLaptops deal alerts.")}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-bold text-white hover:brightness-110"
-            >
-              <WhatsAppIcon className="h-4 w-4" /> Join on WhatsApp
-            </a>
-            <Link href="/deals" className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-ink-950 hover:bg-slate-100">
-              Browse today's deals
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+export { NewsletterCTA } from "@/components/NewsletterCTA";
 
 export { bestSellers, newArrivals };

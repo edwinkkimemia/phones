@@ -31,8 +31,8 @@ export const WHATSAPP_NUMBER =
 export const WHATSAPP_DISPLAY = "0715 135 141";
 export const STORE_PHONE_DISPLAY = "+254 715 135 141";
 
-export function whatsappLink(message: string): string {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+export function whatsappLink(message: string, num: string = WHATSAPP_NUMBER): string {
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
 }
 
 export function productWhatsappMessage(

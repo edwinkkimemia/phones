@@ -30,7 +30,7 @@ export async function GET(_: Request, { params }: { params: { orderNumber: strin
       },
     });
   } catch {
-    return NextResponse.json({ error: "Order lookup unavailable (demo mode). Your confirmation was still recorded in this session." }, { status: 503 });
+    return NextResponse.json({ error: "Order lookup unavailable — try again in a moment." }, { status: 503 });
   }
 }
 

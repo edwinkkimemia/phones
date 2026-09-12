@@ -1,11 +1,17 @@
 import type { MetadataRoute } from "next";
 import { PRODUCTS } from "@/data/catalog";
+import { GUIDES } from "@/data/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://phonelaptops.co.ke";
-  const staticPages = ["", "/laptops", "/desktops", "/phones", "/iphones", "/tablets", "/wearables", "/storage", "/laptop-bags", "/laptop-parts", "/phone-parts", "/accessories", "/gaming", "/deals", "/new-arrivals", "/best-sellers", "/delivery", "/contact", "/compare"];
+  const now = new Date();
+  const staticPages = ["", "/laptops", "/desktops", "/phones", "/iphones", "/tablets", "/wearables", "/storage", "/laptop-bags", "/laptop-parts", "/phone-parts", "/accessories", "/gaming", "/deals", "/new-arrivals", "/best-sellers", "/guides", "/delivery", "/contact", "/compare"];
   return [
-    ...staticPages.map((p) => ({ url: `${base}${p || "/"}`, lastModified: new Date() as Date })),
-    ...PRODUCTS.map((p) => ({ url: `${base}/${p.category}/${p.slug}`, lastModified: new Date() as Date })),
+    { url: `${base}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    ...staticPages
+      .filter((p) => p !== "")
+      .map((p) => ({ url: `${base}${p}`, lastModified: now, changeFrequency: "daily" as const, priority: 0.8 })),
+    ...GUIDES.map((g) => ({ url: `${base}/guides/${g.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...PRODUCTS.map((p) => ({ url: `${base}/${p.category}/${p.slug}`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 })),
   ];
 }

@@ -314,6 +314,22 @@ enum AdFormat {
   SQUARE
 }
 
+// Key-value site settings, editable from /admin → Settings.
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+// Email marketing list (footer/newsletter form + discount popup).
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("website")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
 // Full-width image ads, managed from /admin.
 // targeting: GLOBAL shows everywhere; CATEGORY targets a category slug
 // (or "all"); PRODUCT targets a product slug (or "all").

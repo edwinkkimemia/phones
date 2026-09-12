@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { GitCompareArrows, X } from "lucide-react";
 import { PRODUCTS } from "@/data/catalog";
 import { useCompare } from "@/lib/store";
@@ -26,7 +27,7 @@ export default function ComparePage() {
         <GitCompareArrows className="mx-auto h-12 w-12 text-slate-300" />
         <h1 className="section-title mt-4">Compare Laptops & Phones</h1>
         <p className="mt-2 text-sm text-slate-500">Tap the compare icon on any product to add up to 4 here.</p>
-        <Link href="/laptops" className="btn-primary mt-6">Browse laptops</Link>
+        <Link href="/deals" className="btn-primary mt-6">Browse deals</Link>
       </div>
     );
   }
@@ -45,6 +46,9 @@ export default function ComparePage() {
               {items.map((p) => p && (
                 <th key={p.id} className="p-4 text-left align-top">
                   <button onClick={() => toggle(p.id)} className="float-right rounded-lg p-1 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Remove"><X className="h-4 w-4" /></button>
+                  <Link href={`/${p.category}/${p.slug}`} className="relative mb-2.5 block aspect-square w-full max-w-[150px] overflow-hidden rounded-2xl bg-slate-50">
+                    <Image src={p.images[0]?.url ?? ""} alt={p.name} fill sizes="150px" className="object-cover" />
+                  </Link>
                   <p className="text-[11px] font-bold uppercase text-brand-600">{p.brand}</p>
                   <Link href={`/${p.category}/${p.slug}`} className="line-clamp-2 font-bold hover:text-brand-700">{p.name}</Link>
                   <Price price={p.price} compareAt={p.compareAtPrice} size="sm" className="mt-1" />

@@ -1,17 +1,44 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { orderNumber } from "@/lib/utils";
 import { stkPush, normalizePhone } from "@/lib/mpesa";
 import { PRODUCTS } from "@/data/catalog";
 
-// ---- Admin: list orders ----
+// ---- Customer + admin: list orders ----
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const customerId = searchParams.get("customerId");
   const limit = Math.min(100, Number(searchParams.get("limit") ?? 50) || 50);
   try {
+    // ?mine=1 → only the signed-in customer's own orders.
+    if (searchParams.get("mine") === "1") {
+      const session = await getServerSession(authOptions);
+      const uid = (session?.user as { id?: string } | undefined)?.id;
+      const email = session?.user?.email;
+      if (!uid && !email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const me = uid
+        ? await prisma.user.findUnique({ where: { id: uid } })
+        : email
+          ? await prisma.user.findFirst({ where: { email } })
+          : null;
+      const orders = await prisma.order.findMany({
+        where: {
+          OR: [
+            ...(uid ? [{ userId: uid }] : []),
+            ...(email ? [{ user: { email } }] : []),
+            ...(me?.phone ? [{ phone: me.phone }] : []),
+          ],
+        },
+        include: { items: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+      return NextResponse.json({ source: "db", orders });
+    }
     const orders = await prisma.order.findMany({
       where: {
         ...(status ? { status: status as never } : {}),
@@ -23,7 +50,7 @@ export async function GET(req: Request) {
     });
     return NextResponse.json({ source: "db", orders });
   } catch {
-    return NextResponse.json({ source: "static", orders: [], note: "Connect the database for live orders." });
+    return NextResponse.json({ source: "static", orders: [], note: "Database unavailable — try again." });
   }
 }
 
@@ -83,8 +110,25 @@ export async function POST(req: Request) {
 
   let discount = 0;
   const code = (promoCode ?? "").toUpperCase().trim();
-  if (code === "TECH10" && subtotal >= 10000) discount = Math.round(subtotal * 0.1);
-  if (code === "FLAT500" && subtotal >= 5000) discount = 500;
+  if (code) {
+    try {
+      const promo = await prisma.promoCode.findUnique({ where: { code } });
+      const now = new Date();
+      const usable =
+        promo &&
+        promo.active &&
+        subtotal >= promo.minSubtotal &&
+        !(promo.usageLimit && promo.usedCount >= promo.usageLimit) &&
+        !(promo.endsAt && promo.endsAt < now) &&
+        !(promo.startsAt && promo.startsAt > now);
+      if (usable) {
+        discount = promo.type === "PERCENTAGE" ? Math.round((subtotal * promo.value) / 100) : promo.value;
+        await prisma.promoCode.update({ where: { code }, data: { usedCount: { increment: 1 } } });
+      }
+    } catch {
+      /* promos unavailable — order proceeds without discount */
+    }
+  }
 
   const total = Math.max(0, subtotal + deliveryFee - discount);
   const num = orderNumber();
@@ -96,6 +140,19 @@ export async function POST(req: Request) {
     } catch (e: unknown) {
       return NextResponse.json({ error: e instanceof Error ? e.message : "M-Pesa failed" }, { status: 400 });
     }
+  }
+
+  // Attach the signed-in customer so orders appear in their dashboard.
+  let orderUserId: string | undefined;
+  try {
+    const session = await getServerSession(authOptions);
+    const uid = (session?.user as { id?: string } | undefined)?.id;
+    if (uid) {
+      const exists = await prisma.user.findUnique({ where: { id: uid } });
+      if (exists) orderUserId = uid;
+    }
+  } catch {
+    /* guest checkout */
   }
 
   // Persist (best-effort — storefront works even if DB is down)
@@ -110,6 +167,7 @@ export async function POST(req: Request) {
     const order = await prisma.order.create({
       data: {
         orderNumber: num, customerId: cust.id,
+        ...(orderUserId ? { userId: orderUserId } : {}),
         status: paymentMethod === "MPESA" ? "PENDING" : "PENDING",
         paymentStatus: paymentMethod === "MPESA" ? "INITIATED" : "PENDING",
         paymentMethod: paymentMethod as never,
@@ -132,7 +190,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ orderNumber: order.orderNumber, total, stk });
   } catch {
-    // Static fallback response (demo mode)
+    // Static fallback response (database unreachable)
     return NextResponse.json({
       orderNumber: num, total, demo: true,
       stk,

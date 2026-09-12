@@ -11,6 +11,7 @@ import {
 } from "@/components/home";
 import AdSlot from "@/components/AdSlot";
 import { PRODUCTS } from "@/data/catalog";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
 export default function HomePage() {
   const laptops = PRODUCTS.filter((p) => p.category === "laptops");
@@ -21,6 +22,8 @@ export default function HomePage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }} />
       <Hero />
       <div className="border-b border-slate-100 bg-white">
         <div className="container-x grid grid-cols-2 gap-2 py-3 text-center text-[11px] font-bold text-slate-600 sm:grid-cols-4">

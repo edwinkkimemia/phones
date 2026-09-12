@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,6 +17,7 @@ import type { ProductT } from "@/types";
 import { Price, Rating, StockBadge, ConditionBadge } from "@/components/ui";
 import { WhatsAppIcon } from "@/components/icons";
 import AdSlot from "@/components/AdSlot";
+import ShareButtons from "@/components/ShareButtons";
 import ProductCard from "@/components/ProductCard";
 import { PRODUCTS, REVIEWS } from "@/data/catalog";
 import { useCart, useWishlist } from "@/lib/store";
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 export default function ProductDetailClient({ product }: { product: ProductT }) {
   const [img, setImg] = useState(0);
   const [qty, setQty] = useState(1);
+  const [liveReviews, setLiveReviews] = useState<{ name: string; rating: number; title?: string | null; body: string }[] | null>(null);
   const [selected, setSelected] = useState<Record<string, string>>(() =>
     Object.fromEntries((product.variants ?? []).map((v) => [v.name, v.options[1]?.value ?? v.options[0]?.value]))
   );
@@ -52,6 +54,20 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
   const waUrl = whatsappLink(
     productWhatsappMessage(product.name, finalPrice, `https://phonelaptops.co.ke/${product.category}/${product.slug}`)
   );
+
+  // Live verified reviews (falls back to featured reviews when none yet).
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/reviews?productId=${encodeURIComponent(product.id)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (live && Array.isArray(d.reviews) && d.reviews.length > 0) setLiveReviews(d.reviews.slice(0, 4));
+      })
+      .catch(() => null);
+    return () => {
+      live = false;
+    };
+  }, [product.id]);
 
   const doAdd = () => {
     add({
@@ -190,6 +206,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
             <a href={waUrl} target="_blank" rel="noreferrer" className="text-center text-xs font-semibold text-slate-500 hover:text-emerald-700">
               Ask about this product — we reply in minutes
             </a>
+            <ShareButtons name={product.name} price={finalPrice} />
           </div>
 
           <div className="card mt-5 p-4">
@@ -232,10 +249,10 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
 
           <h2 className="section-title mt-8 !text-xl">Verified Reviews</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {REVIEWS.slice(0, 2).map((r) => (
-              <figure key={r.name} className="card p-4">
+            {(liveReviews ?? REVIEWS.slice(0, 2)).map((r) => (
+              <figure key={`${r.name}-${r.title ?? r.body.slice(0, 12)}`} className="card p-4">
                 <Rating value={r.rating} />
-                <p className="mt-1 text-sm font-bold">{r.title}</p>
+                <p className="mt-1 text-sm font-bold">{r.title || "Verified review"}</p>
                 <blockquote className="mt-1 text-sm text-slate-600">“{r.body}”</blockquote>
                 <figcaption className="mt-2 text-xs text-slate-500">{r.name} • <span className="font-bold text-emerald-700">✓ Verified Purchase</span></figcaption>
               </figure>

@@ -1,15 +1,16 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Smartphone, Lock, Loader2 } from "lucide-react";
 import { useCart } from "@/lib/store";
+import { useSession } from "next-auth/react";
 import { getProduct } from "@/data/catalog";
 import { kes } from "@/lib/checkout-utils";
 import { toast } from "@/components/toast";
 
-const ZONES = [
+const FALLBACK_ZONES = [
   { town: "Nairobi CBD & environs", fee: 250 },
   { town: "Westlands / Kilimani / Karen", fee: 300 },
   { town: "Thika", fee: 350 },
@@ -39,12 +40,37 @@ function CheckoutBody() {
     return cart.items;
   }, [buyProduct, buyQty, cart.items]);
 
-  const [form, setForm] = useState({ name: "", phone: "", email: "", town: ZONES[0].town, address: "", landmark: "", method: "MPESA" as "MPESA" | "CARD" | "PAY_ON_DELIVERY", promo: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", town: FALLBACK_ZONES[0].town, address: "", landmark: "", method: "MPESA" as "MPESA" | "CARD" | "PAY_ON_DELIVERY", promo: "" });
+  const [zones, setZones] = useState(FALLBACK_ZONES);
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMsg, setPromoMsg] = useState("");
   const [placing, setPlacing] = useState(false);
+  const { data: session, status } = useSession();
 
-  const zone = ZONES.find((z) => z.town === form.town) ?? ZONES[0];
+  // Members get name/email prefilled (order auto-links to their account).
+  useEffect(() => {
+    if (session?.user) {
+      setForm((f) => ({
+        ...f,
+        name: f.name || (session.user?.name ?? ""),
+        email: f.email || (session.user?.email ?? ""),
+      }));
+    }
+  }, [session]);
+
+  // Live delivery zones managed in /admin → Settings.
+  useEffect(() => {
+    fetch("/api/delivery-zones")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.zones) && d.zones.length > 0) {
+          setZones(d.zones.map((z: { town: string; fee: number }) => ({ town: z.town, fee: z.fee })));
+        }
+      })
+      .catch(() => null);
+  }, []);
+
+  const zone = zones.find((z) => z.town === form.town) ?? { town: form.town, fee: 350 };
   const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
   const total = sub + zone.fee - promoDiscount;
 
@@ -102,6 +128,16 @@ function CheckoutBody() {
     <div className="container-x py-8 md:py-12">
       <h1 className="section-title">Checkout</h1>
       <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500"><Lock className="h-3.5 w-3.5" /> Secure checkout • M-Pesa first • No account needed</p>
+      {status !== "authenticated" && status !== "loading" && (
+        <div className="card mt-4 flex flex-wrap items-center gap-3 border-brand-200 bg-brand-50/60 p-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-extrabold text-slate-900">Checking out as guest — no problem.</p>
+            <p className="text-xs text-slate-500">Members check out faster and track orders in their account.</p>
+          </div>
+          <Link href="/account/login?callbackUrl=/checkout" className="btn-ghost !py-2 text-xs">Sign in</Link>
+          <Link href="/account/register" className="btn-primary !py-2 text-xs">Create account</Link>
+        </div>
+      )}
       <form onSubmit={placeOrder} className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-4">
           <div className="card p-5">
@@ -112,7 +148,7 @@ function CheckoutBody() {
               <div><label className="label">Email (receipt)</label><input className="input" value={form.email} onChange={set("email")} placeholder="you@example.com" type="email" /></div>
               <div><label className="label">Delivery town *</label>
                 <select className="input" value={form.town} onChange={set("town")}>
-                  {ZONES.map((z) => <option key={z.town} value={z.town}>{z.town} — {kes(z.fee)}</option>)}
+                  {zones.map((z) => <option key={z.town} value={z.town}>{z.town} — {kes(z.fee)}</option>)}
                 </select>
               </div>
               <div className="sm:col-span-2"><label className="label">Address / street *</label><input className="input" value={form.address} onChange={set("address")} placeholder="Building, street, estate" required /></div>

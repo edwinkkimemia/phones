@@ -29,12 +29,12 @@ function pageMessage(path: string): string {
   return "Hello PhoneLaptops! I need help choosing a device.";
 }
 
-export function WhatsAppFloat() {
+export function WhatsAppFloat({ phone }: { phone?: string }) {
   const path = usePathname() ?? "/";
   if (path.startsWith("/admin")) return null;
   return (
     <a
-      href={whatsappLink(pageMessage(path))}
+      href={whatsappLink(pageMessage(path), phone)}
       target="_blank"
       rel="noreferrer"
       className="fixed bottom-20 right-4 z-50 grid place-items-center rounded-full bg-[#25D366] p-3.5 text-white shadow-pop transition hover:scale-105 md:bottom-6 md:right-6"

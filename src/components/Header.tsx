@@ -13,8 +13,11 @@ import {
   Zap,
   Phone,
   Mail,
+  GitCompareArrows,
 } from "lucide-react";
-import { useCart, useWishlist } from "@/lib/store";
+import { useCart, useWishlist, useCompare } from "@/lib/store";
+import { useSession } from "next-auth/react";
+import { STORE_PHONE_DISPLAY } from "@/lib/utils";
 import { POPULAR_SEARCHES } from "@/data/catalog";
 
 const NAV = [
@@ -32,15 +35,29 @@ const NAV = [
   { label: "New Arrivals", href: "/new-arrivals" },
 ];
 
-export default function Header() {
+export default function Header({
+  phone = STORE_PHONE_DISPLAY,
+  email = "support@phonelaptops.co.ke",
+  announcement = "FAST DELIVERY • AUTHENTIC PRODUCTS • M-PESA ACCEPTED",
+}: {
+  phone?: string;
+  email?: string;
+  announcement?: string;
+}) {
   const router = useRouter();
   const count = useCart((s) => s.count());
   const wishCount = useWishlist((s) => s.ids.length);
+  const compareCount = useCompare((s) => s.ids.length);
+  const { data: session } = useSession();
+  const userInitial = (session?.user?.email ?? "").charAt(0).toUpperCase();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [bump, setBump] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [hideTop, setHideTop] = useState(false);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
+  const lastY = useRef(0);
 
   useEffect(() => {
     setBump(true);
@@ -48,15 +65,38 @@ export default function Header() {
     return () => clearTimeout(t);
   }, [count]);
 
-  // Bottom mobile nav "Search" tab summons this field instead of changing page.
+  // Top announcement bar hides on scroll-down, returns on scroll-up.
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setHideTop(y > 140 && y > lastY.current);
+        lastY.current = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  // Bottom mobile nav "Search" tab toggles the search field (hidden until needed).
   useEffect(() => {
     const handler = () => {
       setOpen(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      window.setTimeout(() => {
-        mobileSearchRef.current?.focus({ preventScroll: true });
-        mobileSearchRef.current?.select();
-      }, 350);
+      setMobileSearchOpen((was) => {
+        if (was) {
+          mobileSearchRef.current?.blur();
+          return false;
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.setTimeout(() => {
+          mobileSearchRef.current?.focus({ preventScroll: true });
+          mobileSearchRef.current?.select();
+        }, 350);
+        return true;
+      });
     };
     window.addEventListener("pl:open-search", handler);
     return () => window.removeEventListener("pl:open-search", handler);
@@ -71,20 +111,22 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-ink-950 text-white">
+      {!hideTop && (
+        <div className="bg-ink-950 text-white">
         <div className="container-x flex items-center justify-center gap-4 py-1.5 text-[11px] font-bold tracking-[0.12em] sm:justify-between">
-          <a href="tel:+254715135141" className="hidden items-center gap-1.5 hover:text-accent sm:inline-flex">
-            <Phone className="h-3.5 w-3.5 text-accent" /> 0715 135 141
+          <a href={`tel:+${phone.replace(/\D/g, "")}`} className="hidden items-center gap-1.5 hover:text-accent sm:inline-flex">
+            <Phone className="h-3.5 w-3.5 text-accent" /> {phone}
           </a>
           <p className="flex items-center gap-2 text-center tracking-[0.14em]">
             <Zap className="h-3.5 w-3.5 text-accent" />
-            FAST DELIVERY • AUTHENTIC PRODUCTS • M-PESA ACCEPTED
+            {announcement}
           </p>
-          <a href="mailto:support@phonelaptops.co.ke" className="hidden items-center gap-1.5 normal-case tracking-normal hover:text-accent md:inline-flex">
-            <Mail className="h-3.5 w-3.5 text-accent" /> support@phonelaptops.co.ke
+          <a href={`mailto:${email}`} className="hidden items-center gap-1.5 normal-case tracking-normal hover:text-accent md:inline-flex">
+            <Mail className="h-3.5 w-3.5 text-accent" /> {email}
           </a>
         </div>
-      </div>
+        </div>
+      )}
 
       <div className="border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="container-x flex items-center gap-3 py-3">
@@ -150,11 +192,30 @@ export default function Header() {
 
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link
-              href="/account"
+              href={session ? "/account" : "/account/login"}
               className="hidden h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:inline-flex"
+              aria-label="Account"
             >
-              <User className="h-5 w-5" />
-              <span className="hidden xl:block">Account</span>
+              {session ? (
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-brand-600 to-accent text-xs font-extrabold text-white">
+                  {userInitial}
+                </span>
+              ) : (
+                <User className="h-5 w-5" />
+              )}
+              <span className="hidden xl:block">{session ? "My Account" : "Account"}</span>
+            </Link>
+            <Link
+              href="/compare"
+              className="relative grid h-10 w-10 place-items-center rounded-xl text-slate-700 hover:bg-slate-100"
+              aria-label="Compare products"
+            >
+              <GitCompareArrows className="h-5 w-5" />
+              {compareCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-[1.25rem] place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
+                  {compareCount}
+                </span>
+              )}
             </Link>
             <Link
               href="/wishlist"
@@ -186,19 +247,32 @@ export default function Header() {
           </div>
         </div>
 
-        <form onSubmit={submit} className="container-x scroll-mt-32 pb-3 md:hidden">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              ref={mobileSearchRef}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search laptops, iPhones, Samsung…"
-              enterKeyHint="search"
-              className="input pl-11 !rounded-full !bg-slate-100"
-            />
-          </div>
-        </form>
+        {mobileSearchOpen && (
+          <form onSubmit={submit} className="container-x scroll-mt-32 pb-3 md:hidden">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                ref={mobileSearchRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search laptops, iPhones, Samsung…"
+                enterKeyHint="search"
+                className="input pl-11 pr-11 !rounded-full !bg-slate-100"
+              />
+              <button
+                type="button"
+                aria-label="Close search"
+                onClick={() => {
+                  setMobileSearchOpen(false);
+                  mobileSearchRef.current?.blur();
+                }}
+                className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-slate-400 hover:bg-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </form>
+        )}
 
         <nav className="hidden border-t border-slate-100 lg:block">
           <div className="container-x flex items-center justify-between gap-0.5 overflow-x-auto no-scrollbar">

@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ product: p });
   } catch {
-    return NextResponse.json({ error: "Connect the database to manage products (demo mode is read-only)." }, { status: 503 });
+    return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
   }
 }
 

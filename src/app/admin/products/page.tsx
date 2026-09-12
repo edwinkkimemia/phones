@@ -63,7 +63,7 @@ export default function AdminProducts() {
       <div className="flex flex-wrap items-center gap-2">
         <div>
           <h1 className="section-title !text-2xl">Products</h1>
-          <p className="text-xs text-slate-500">{filtered.length} items • Source: {source === "db" ? "Live database" : "Demo (connect DB to edit)"}</p>
+          <p className="text-xs text-slate-500">{filtered.length} items • {source === "db" ? "Live database" : "Offline — catalog preview"}</p>
         </div>
         <Link href="/admin/products/new" className="btn-primary ml-auto !py-2.5 text-xs"><Plus className="h-4 w-4" /> Add product</Link>
       </div>

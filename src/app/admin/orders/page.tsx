@@ -43,7 +43,7 @@ export default function AdminOrders() {
   return (
     <div>
       <h1 className="section-title !text-2xl">Orders</h1>
-      <p className="text-xs text-slate-500">{shown.length} shown • Source: {source === "db" ? "Live database" : "Demo (connect DB)"}</p>
+      <p className="text-xs text-slate-500">{shown.length} shown • {source === "db" ? "Live database" : "Offline"}</p>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {["ALL", ...STATUSES].map((s) => (
           <button key={s} onClick={() => setFilter(s)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${filter === s ? "bg-ink-950 text-white" : "bg-white text-slate-600 border border-slate-200"}`}>

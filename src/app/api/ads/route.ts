@@ -2,50 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
-// Demo ads shown when the database isn't connected yet.
-const STATIC_ADS = [
-  {
-    id: "static-global",
-    title: "Today's Tech Deals — Save up to 20%",
-    image:
-      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&fit=crop&w=1600&q=80",
-    link: "/deals",
-    placement: "GLOBAL",
-    target: "all",
-    format: "WIDE",
-  },
-  {
-    id: "static-laptops",
-    title: "Laptop deals from KES 42,999",
-    image:
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=80",
-    link: "/laptops",
-    placement: "CATEGORY",
-    target: "laptops",
-    format: "WIDE",
-  },
-  {
-    id: "static-square-deals",
-    title: "M-Pesa deals — pay on delivery available",
-    image:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80",
-    link: "/deals",
-    placement: "GLOBAL",
-    target: "all",
-    format: "SQUARE",
-  },
-  {
-    id: "static-square-accessories",
-    title: "Complete your setup — accessories from KES 2,499",
-    image:
-      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=800&q=80",
-    link: "/accessories",
-    placement: "GLOBAL",
-    target: "all",
-    format: "SQUARE",
-  },
-];
-
 // GET /api/ads?placement=CATEGORY|PRODUCT|GLOBAL&target=slug&format=WIDE|SQUARE&index=0
 // Exact match wins; falls back to GLOBAL. `index` picks the nth candidate (for stacked slots).
 export async function GET(req: Request) {
@@ -66,7 +22,7 @@ export async function GET(req: Request) {
       const ads = await prisma.adSlot.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] });
       return NextResponse.json({ source: "db", ads });
     } catch {
-      return NextResponse.json({ source: "static", ads: STATIC_ADS });
+      return NextResponse.json({ source: "db", ads: [] });
     }
   }
 
@@ -94,19 +50,10 @@ export async function GET(req: Request) {
     const candidates = dedup([exact, wildcard, global]);
     if (candidates.length > 0)
       return NextResponse.json({ source: "db", ad: candidates[index % candidates.length] });
+    return NextResponse.json({ source: "db", ad: null });
   } catch {
-    /* fall through to static */
+    return NextResponse.json({ source: "db", ad: null });
   }
-  const pool = STATIC_ADS.filter((a) => a.format === format);
-  const candidates = dedup([
-    pool.find((a) => a.placement === placement && a.target === target),
-    pool.find((a) => a.placement === placement && a.target === "all"),
-    ...pool.filter((a) => a.placement === "GLOBAL"),
-  ]);
-  return NextResponse.json({
-    source: "static",
-    ad: candidates.length > 0 ? candidates[index % candidates.length] : null,
-  });
 }
 
 // Admin: list all slots
@@ -125,7 +72,7 @@ export async function POST(req: Request) {
     const ad = await prisma.adSlot.create({ data: { ...parsed.data, placement: parsed.data.placement as never, format: parsed.data.format as never } });
     return NextResponse.json({ ad });
   } catch {
-    return NextResponse.json({ error: "Connect the database to manage ads (demo mode is read-only)." }, { status: 503 });
+    return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
   }
 }
 

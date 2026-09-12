@@ -97,7 +97,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           </Link>
         )}
       </div>
-      {readonly && <p className="card mt-3 border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">Demo mode — connect the database to edit. Values below are read-only.</p>}
+      {readonly && <p className="card mt-3 border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">Offline — values below are read-only until the database reconnects.</p>}
       {msg && <p className="mt-2 text-xs font-bold text-slate-600">{msg}</p>}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Store, ShieldAlert } from "lucide-react";
+import { Store } from "lucide-react";
 import AdminNav from "./nav";
+import AdminProviders from "./providers";
 
 export const metadata = { title: "Admin Dashboard", robots: { index: false, follow: false } };
 
@@ -26,14 +27,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
       <div className="container-x grid gap-6 py-6 lg:grid-cols-[230px_1fr]">
-        <AdminNav />
+        <AdminProviders>
+          <AdminNav />
+        </AdminProviders>
         <div className="min-w-0">
-          <p className="mb-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
-            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-            Demo console — protect with NextAuth <code>role=ADMIN</code> before exposing publicly
-            (see <code>src/lib/auth.ts</code>). Mutations need <code>DATABASE_URL</code>; without it pages show live demo data.
-          </p>
-          {children}
+          <AdminProviders>{children}</AdminProviders>
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { PRODUCTS } from "@/data/catalog";
 
 export async function GET() {
   try {
@@ -28,19 +27,15 @@ export async function GET() {
       byCategory: [],
     });
   } catch {
-    // Demo stats from static catalog so the dashboard always renders
-    const revenue = PRODUCTS.reduce((s, p) => s + p.price * p.soldCount, 0);
-    const orders = PRODUCTS.reduce((s, p) => s + p.soldCount, 0);
+    // Database unreachable — report zeros rather than demo data.
     return NextResponse.json({
-      source: "static",
-      revenue, orders,
-      aov: Math.round(revenue / Math.max(1, orders)),
-      bestSellers: [...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount).slice(0, 5).map((p) => ({ name: p.name, sold: p.soldCount, revenue: p.price * p.soldCount })),
-      lowStock: PRODUCTS.filter((p) => p.stockQty <= 8).map((p) => ({ name: p.name, qty: p.stockQty })),
-      byCategory: ["laptops", "desktops", "iphones", "smartphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "phone-parts", "accessories", "gaming"].map((c) => ({
-        category: c,
-        revenue: PRODUCTS.filter((p) => p.category === c).reduce((s, p) => s + p.price * p.soldCount, 0),
-      })),
+      source: "db",
+      revenue: 0,
+      orders: 0,
+      aov: 0,
+      bestSellers: [],
+      lowStock: [],
+      byCategory: [],
     });
   }
 }

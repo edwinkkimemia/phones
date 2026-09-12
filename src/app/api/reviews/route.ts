@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { REVIEWS } from "@/data/catalog";
 
 export async function GET(req: Request) {
   const sp = new URL(req.url).searchParams;
@@ -19,7 +18,7 @@ export async function GET(req: Request) {
     });
     return NextResponse.json({ source: "db", reviews });
   } catch {
-    return NextResponse.json({ source: "static", reviews: REVIEWS });
+    return NextResponse.json({ source: "db", reviews: [] });
   }
 }
 
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ review: r, message: "Thanks! Your review is awaiting moderation." });
   } catch {
-    return NextResponse.json({ message: "Thanks! Your review was received (demo mode)." });
+    return NextResponse.json({ message: "Thanks! Your review was received and is awaiting moderation." });
   }
 }
 

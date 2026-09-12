@@ -4,6 +4,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { WhatsAppFloat, MobileNav } from "@/components/chrome";
 import { Toasts } from "@/components/toast";
+import PromoPopup from "@/components/PromoPopup";
+import AiAssistant from "@/components/AiAssistant";
+import StoreProviders from "@/components/Providers";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://phonelaptops.co.ke"),
@@ -26,6 +30,22 @@ export const metadata: Metadata = {
     siteName: "PhoneLaptops.co.ke",
     type: "website",
     locale: "en_KE",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "PhoneLaptops.co.ke — Latest Gadgets. Better Living. 0715 135 141",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@phonelaptopske",
+    title: "PhoneLaptops.co.ke — Latest Laptops, iPhones & Phones in Kenya",
+    description:
+      "Genuine laptops, iPhones, phones & accessories at honest Kenyan prices. M-Pesa accepted, delivery across Kenya.",
+    images: ["/og-image.jpg"],
   },
   robots: { index: true, follow: true },
   icons: {
@@ -34,7 +54,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
   return (
     <html lang="en-KE">
       <head>
@@ -45,12 +66,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen pb-16 md:pb-0">
-        <Header />
-        <main className="min-h-[60vh]">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
-        <MobileNav />
-        <Toasts />
+        <StoreProviders>
+          <Header
+            phone={settings.phone_display}
+            email={settings.email}
+            announcement={settings.announcement}
+          />
+          <main className="min-h-[60vh]">{children}</main>
+          <Footer settings={settings} />
+          <WhatsAppFloat phone={settings.whatsapp_number} />
+          <MobileNav />
+          <AiAssistant />
+          <PromoPopup />
+          <Toasts />
+        </StoreProviders>
       </body>
     </html>
   );
