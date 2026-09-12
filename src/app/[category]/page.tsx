@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import ShopClient from "@/components/ShopClient";
 import AdSlot from "@/components/AdSlot";
@@ -121,19 +122,46 @@ export default function CategoryPage({ params }: { params: { category: string } 
   const maxPrice = Math.max(...items.map((p) => p.price), 50000);
 
   const cat = CATEGORIES.find((c) => c.slug === params.category);
+  // Collection pages have no catalog image — give them their own backdrops.
+  const heroImage =
+    cat?.image ??
+    ({
+      deals: "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&fit=crop&w=1600&q=80",
+      "new-arrivals": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1600&q=80",
+      "best-sellers": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=80",
+    } as Record<string, string>)[params.category];
 
   return (
     <>
-      <div className="bg-ink-950 text-white">
-        <div className="container-x py-10">
+      <div className="relative overflow-hidden bg-ink-950 text-white">
+        {heroImage && (
+          <Image
+            src={heroImage}
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            className="object-cover opacity-45"
+          />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/65 to-ink-950/25" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/70 via-transparent to-ink-950/20" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(600px 260px at 12% 20%, rgba(43,107,255,.35), transparent), radial-gradient(500px 240px at 88% 30%, rgba(0,213,255,.16), transparent)",
+          }}
+        />
+        <div className="container-x relative py-10 md:py-14">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">{meta.hero.eyebrow}</p>
-          <h1 className="font-display mt-2 text-3xl font-extrabold sm:text-4xl">{meta.hero.heading}</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-300">
+          <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{meta.hero.heading}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-200">
             {meta.hero.blurb}
           </p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
             {meta.hero.badges.map((b) => (
-              <span key={b} className="rounded-lg bg-white/10 px-3 py-1.5">{b}</span>
+              <span key={b} className="rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-sm">{b}</span>
             ))}
           </div>
         </div>
