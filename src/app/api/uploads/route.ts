@@ -41,6 +41,17 @@ export async function POST(req: Request) {
 
   try {
     const useBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+    // Serverless disks are read-only — without a Blob store there is
+    // nowhere to put the file. Fail loud instead of a cryptic EROFS.
+    if (!useBlob && process.env.VERCEL) {
+      return NextResponse.json(
+        {
+          error:
+            "No Blob store connected. Go to Vercel Dashboard → Storage → Create → Blob, connect it to this project, then redeploy so the token reaches the server.",
+        },
+        { status: 503 }
+      );
+    }
     const d = new Date();
     const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
     let dir = "";
@@ -63,7 +74,9 @@ export async function POST(req: Request) {
       }
     }
     return NextResponse.json({ urls });
-  } catch {
-    return NextResponse.json({ error: "Upload failed on the server." }, { status: 500 });
+  } catch (e: unknown) {
+    console.error("[upload] failed:", e);
+    const detail = e instanceof Error ? e.message : "Unknown error";
+    return NextResponse.json({ error: `Upload failed on the server (${detail})` }, { status: 500 });
   }
 }
