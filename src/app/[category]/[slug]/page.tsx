@@ -27,7 +27,7 @@ export default function ProductPage({ params }: { params: { category: string; sl
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
-      <ProductDetailClient product={p} />
+      <ProductDetailClient key={p.slug} product={p} />
     </>
   );
 }

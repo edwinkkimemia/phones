@@ -101,7 +101,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
         <div>
           <div className="card relative aspect-square overflow-hidden">
             <Image
-              src={product.images[img]?.url ?? ""}
+              src={product.images[img]?.url || product.images[0]?.url || "/logo.png"}
               alt={product.images[img]?.alt ?? product.name}
               fill
               className="object-cover"

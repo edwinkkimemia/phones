@@ -157,7 +157,7 @@ export default async function CategoryPage({ params }: { params: { category: str
         <span className="truncate font-semibold text-slate-800">{meta.title}</span>
       </nav>
       <AdSlot placement="CATEGORY" target={params.category} />
-      <ShopClient products={items} filters={{ brands, maxPrice }} title={cat?.name ? `${cat.name} — ${meta.title}` : meta.title} subtitle={meta.subtitle} />
+      <ShopClient key={params.category} products={items} filters={{ brands, maxPrice }} title={cat?.name ? `${cat.name} — ${meta.title}` : meta.title} subtitle={meta.subtitle} />
     </>
   );
 }
@@ -222,7 +222,7 @@ function LiveCategoryPage({
         <span className="truncate font-semibold text-slate-800">{meta.title}</span>
       </nav>
       <AdSlot placement="CATEGORY" target={slug} />
-      <ShopClient products={items} filters={{ brands, maxPrice }} title={meta.title} subtitle={meta.subtitle} />
+      <ShopClient key={slug} products={items} filters={{ brands, maxPrice }} title={meta.title} subtitle={meta.subtitle} />
     </>
   );
 }
