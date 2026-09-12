@@ -89,7 +89,7 @@ export default function NewAdPage() {
           )}
           <div><label className="label">Image URL *</label><input className="input font-mono !text-xs" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://…" required /></div>
           <ImageUploader compact label="…or upload creative" onUploaded={(urls) => urls[0] && setForm((f) => ({ ...f, image: urls[0] }))} />
-          <p className="text-[11px] text-slate-400">WIDE: 1600px wide • SQUARE: 800×800</p>
+          <p className="text-[11px] leading-relaxed text-slate-400">WIDE displays ≈1216×176 desktop / 343×112 phones — upload 1920×400, keep text centered (edges crop). SQUARE displays ≈360×360 desktop / 165×165 phones — upload 1080×1080.</p>
         </div>
       </form>
     </div>

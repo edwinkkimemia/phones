@@ -126,7 +126,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
           {form.image && <img src={form.image} alt="" className={`w-full rounded-xl border border-slate-200 object-cover ${form.format === "SQUARE" ? "aspect-square" : "aspect-[4/1]"}`} />}
           <div><label className="label">Image URL</label><input className="input font-mono !text-xs" value={form.image} onChange={set("image")} /></div>
           <ImageUploader compact label="Upload new creative" onUploaded={(urls) => urls[0] && setForm((f) => (f ? { ...f, image: urls[0] } : f))} />
-          <p className="text-[11px] text-slate-400">WIDE: 1600px wide banner • SQUARE: 800×800</p>
+          <p className="text-[11px] leading-relaxed text-slate-400">WIDE shows ≈1216×176 desktop / 343×112 phones (upload 1920×400, centered). SQUARE shows ≈360×360 desktop / 165×165 phones (upload 1080×1080).</p>
         </div>
       </div>
     </div>
