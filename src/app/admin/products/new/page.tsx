@@ -6,7 +6,7 @@ import { ChevronRight, X, Plus, Trash2 } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import RichTextEditor from "@/components/RichTextEditor";
 
-const CATS = ["laptops", "desktops", "iphones", "smartphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "accessories", "gaming"];
+const CATS = ["laptops", "desktops", "phones", "iphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "phone-parts", "accessories", "gaming"];
 
 export default function NewProductPage() {
   const router = useRouter();

@@ -29,5 +29,11 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   experimental: { typedRoutes: false },
+  async redirects() {
+    return [
+      // Legacy slug: smartphones/* → phones/*
+      { source: "/smartphones/:path*", destination: "/phones/:path*", permanent: true },
+    ];
+  },
 };
 export default nextConfig;

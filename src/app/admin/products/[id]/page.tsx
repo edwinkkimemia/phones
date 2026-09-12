@@ -6,7 +6,7 @@ import { ChevronRight, Trash2, X, ExternalLink, Plus } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import RichTextEditor from "@/components/RichTextEditor";
 
-const CATS = ["laptops", "desktops", "iphones", "smartphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "accessories", "gaming"];
+const CATS = ["laptops", "desktops", "phones", "iphones", "tablets", "wearables", "storage", "laptop-bags", "laptop-parts", "phone-parts", "accessories", "gaming"];
 
 interface Full {
   id: string; slug?: string; name: string; price: number;

@@ -2,7 +2,7 @@ export type CategorySlug =
   | "laptops"
   | "desktops"
   | "iphones"
-  | "smartphones"
+  | "phones"
   | "tablets"
   | "wearables"
   | "storage"

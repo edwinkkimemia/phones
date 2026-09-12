@@ -50,7 +50,7 @@ const TITLES: Record<string, CatMeta> = {
     hero: { eyebrow: "Repair, Don't Replace", heading: "Original Phone Parts", blurb: "Original AMOLED screens, zero-cycle batteries and pro toolkits — with free fitting advice and Nairobi fitting on request. Fix it for a fraction of a new phone.", badges: ["✓ Original Quality", "✓ 100% Battery Health", "✓ Fitting Available"] },
   },
   phones: {
-    title: "Smartphones in Kenya", subtitle: "Samsung • Xiaomi • Tecno • Infinix",
+    title: "Phones in Kenya", subtitle: "Samsung • Xiaomi • Tecno • Infinix",
     desc: "Popular smartphones with 5G, big batteries and great cameras.",
     hero: { eyebrow: "Phone Store Kenya", heading: "Phones Kenyans Love", blurb: "Samsung, Xiaomi, Tecno, Infinix and more — 5G-ready, big batteries, great cameras. Sealed stock with 1-year warranty at honest Kenyan prices.", badges: ["✓ Sealed & Genuine", "✓ 5G Ready", "✓ 1-Year Warranty"] },
   },
@@ -132,7 +132,7 @@ export default async function CategoryPage({ params }: { params: { category: str
   else if (params.category === "new-arrivals") items = PRODUCTS.filter((p) => p.isNew).concat(PRODUCTS.slice(0, 4));
   else if (params.category === "best-sellers") items = [...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount);
   else if (params.category === "phones")
-    items = PRODUCTS.filter((p) => p.category === "smartphones" || p.category === "iphones");
+    items = PRODUCTS.filter((p) => p.category === "phones" || p.category === "iphones");
   else items = PRODUCTS.filter((p) => p.category === params.category);
 
   const brands = [...new Set(items.map((p) => p.brand))];

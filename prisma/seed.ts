@@ -79,6 +79,19 @@ async function main() {
     }).catch(() => null);
   }
 
+  // One-time remap: legacy "smartphones" slug is now "phones".
+  try {
+    const phones = await prisma.category.findUnique({ where: { slug: "phones" } });
+    const legacy = await prisma.category.findUnique({ where: { slug: "smartphones" } });
+    if (phones && legacy) {
+      await prisma.product.updateMany({ where: { categoryId: legacy.id }, data: { categoryId: phones.id } });
+      await prisma.category.delete({ where: { id: legacy.id } });
+      console.log("Remapped legacy smartphones category → phones.");
+    }
+  } catch {
+    /* fresh DB — nothing to remap */
+  }
+
   console.log(`Seeded ${PRODUCTS.length} products, ${CATEGORIES.length} categories, ${BRANDS.length} brands.`);
 
   // Demo full-width image ads (shown above breadcrumbs on PDP / category pages)
@@ -177,7 +190,6 @@ async function main() {
       { slug: "laptops", title: "Laptop deals from KES 42,999", image: img("photo-1496181133206-80ce9b88a853") },
       { slug: "desktops", title: "Desktops for office & studio", image: img("photo-1547082299-de196ea013d6") },
       { slug: "iphones", title: "iPhone 17 Pro — now in stock", image: img("photo-1592750475338-74b7b21085ab") },
-      { slug: "smartphones", title: "Samsung, Xiaomi, Tecno & more", image: img("photo-1511707171634-5f897ff02aa9") },
       { slug: "phones", title: "Phones & iPhones Kenyans love", image: img("photo-1511707171634-5f897ff02aa9") },
       { slug: "tablets", title: "Tablets for work, study & play", image: img("photo-1544244015-0df4b3ffc6b0") },
       { slug: "wearables", title: "Smartwatches from KES 5,999", image: img("photo-1579586337278-3befd40fd17a") },

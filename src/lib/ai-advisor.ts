@@ -21,7 +21,7 @@ const CATEGORY_WORDS: [RegExp, string][] = [
   [/\bbag|backpack|sleeve|case\b/i, "laptop-bags"],
   [/\bram|battery|charger|adapter|screen replacement|spare|repair|fix/i, "laptop-parts"],
   [/phone screen|phone battery|flex/i, "phone-parts"],
-  [/phone|smartphone|samsung|tecno|infinix|xiaomi|redmi|pixel/i, "smartphones"],
+  [/phone|smartphone|samsung|tecno|infinix|xiaomi|redmi|pixel/i, "phones"],
   [/gaming|game|ps5|controller|keyboard|mouse|headset/i, "gaming"],
   [/charger|earbuds|headphone|power bank|cable|hub|accessor/i, "accessories"],
 ];
@@ -77,7 +77,7 @@ export function adviseLocal(message: string): Advice {
   const brandHit = BRANDS.find((b) => new RegExp(`\\b${b}\\b`, "i").test(q));
 
   let pool = cats.length
-    ? [...PRODUCTS].filter((p) => cats.includes(p.category) || (cats.includes("smartphones") && p.category === "iphones"))
+    ? [...PRODUCTS].filter((p) => cats.includes(p.category) || (cats.includes("phones") && p.category === "iphones"))
     : [...PRODUCTS];
   if (brandHit) {
     const branded = pool.filter((p) => p.brand.toLowerCase() === brandHit);
