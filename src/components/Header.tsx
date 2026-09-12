@@ -65,7 +65,9 @@ export default function Header({
     return () => clearTimeout(t);
   }, [count]);
 
-  // Top announcement bar hides on scroll-down, returns on scroll-up.
+  // Top announcement bar: hides once (scrolling down past 220px),
+  // returns only near the top (<80px). Wide deadband + no animation,
+  // so it can never flap or shake mid-page.
   useEffect(() => {
     let ticking = false;
     const onScroll = () => {
@@ -73,8 +75,12 @@ export default function Header({
       ticking = true;
       window.requestAnimationFrame(() => {
         const y = window.scrollY;
-        setHideTop(y > 140 && y > lastY.current);
-        lastY.current = y;
+        const dy = y - lastY.current;
+        if (Math.abs(dy) >= 4) {
+          if (y > 220 && dy > 0) setHideTop(true);
+          else if (y < 80) setHideTop(false);
+          lastY.current = y;
+        }
         ticking = false;
       });
     };
