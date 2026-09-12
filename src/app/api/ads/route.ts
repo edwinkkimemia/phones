@@ -61,6 +61,23 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const denied = await requireAdmin();
   if (denied) return denied;
+  // Restore missing defaults (idempotent — never overwrites admin edits).
+  if (new URL(req.url).searchParams.get("restore") === "1") {
+    const { ALL_DEFAULT_ADS } = await import("@/data/default-ads");
+    try {
+      for (const a of ALL_DEFAULT_ADS) {
+        await prisma.adSlot.upsert({
+          where: { id: a.id },
+          update: {},
+          create: { ...a, placement: a.placement as never, format: a.format as never },
+        });
+      }
+      const count = await prisma.adSlot.count();
+      return NextResponse.json({ ok: true, restored: ALL_DEFAULT_ADS.length, total: count });
+    } catch {
+      return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
+    }
+  }
   const Body = z.object({
     title: z.string().min(3),
     image: z.string().url(),

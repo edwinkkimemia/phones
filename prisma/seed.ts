@@ -147,6 +147,15 @@ async function main() {
         format: "WIDE" as never,
         sortOrder: 0,
       },
+      {
+        title: "Everything tech, one trusted store — shop all departments",
+        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80",
+        link: "/deals",
+        placement: "HOMEPAGE" as never,
+        target: "above-footer",
+        format: "WIDE" as never,
+        sortOrder: 0,
+      },
     ];
     for (const a of demoAds) {
       // update:{} — ads are owned in /admin after first seed; redeploys must not clobber them.

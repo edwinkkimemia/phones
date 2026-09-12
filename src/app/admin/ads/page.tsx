@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, RotateCcw } from "lucide-react";
 
 interface Ad {
   id: string; title: string; image: string; link: string;
@@ -19,11 +19,21 @@ async function patchAd(id: string, patch: Record<string, unknown>) {
 
 export default function AdminAds() {
   const [ads, setAds] = useState<Ad[]>([]);
+  const [msg, setMsg] = useState("");
 
   const load = () => {
     fetch("/api/ads?list=all").then((r) => r.json()).then((d) => setAds(d.ads ?? [])).catch(() => setAds([]));
   };
   useEffect(load, []);
+
+  const restore = async () => {
+    if (!confirm("Restore the default ad set? Missing defaults return; your edits stay untouched.")) return;
+    setMsg("");
+    const res = await fetch("/api/ads?restore=1", { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    setMsg(res.ok ? `Defaults restored (${data.total ?? 0} total ads).` : (data.error ?? "Failed"));
+    if (res.ok) load();
+  };
 
   return (
     <div>
@@ -37,8 +47,12 @@ export default function AdminAds() {
             Homepage targets: <code>below-hero</code>, <code>below-deals</code>, <code>above-footer</code>.
           </p>
         </div>
-        <Link href="/admin/ads/new" className="btn-primary ml-auto !py-2.5 text-xs"><Plus className="h-4 w-4" /> New ad</Link>
+        <div className="ml-auto flex gap-2">
+          <button onClick={restore} className="btn-ghost !py-2.5 text-xs"><RotateCcw className="h-4 w-4" /> Restore defaults</button>
+          <Link href="/admin/ads/new" className="btn-primary !py-2.5 text-xs"><Plus className="h-4 w-4" /> New ad</Link>
+        </div>
       </div>
+      {msg && <p className="mt-2 text-xs font-bold text-slate-600">{msg}</p>}
 
       <div className="mt-4 space-y-2.5">
         {ads.map((a) => (
