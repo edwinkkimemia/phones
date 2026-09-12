@@ -3,7 +3,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PackageSearch, Loader2 } from "lucide-react";
 import { kes } from "@/lib/utils";
-import RepairCTA from "@/components/RepairCTA";
+import PageHero from "@/components/PageHero";
 
 const STEPS = ["PENDING", "PAID", "PROCESSING", "DISPATCHED", "DELIVERED"] as const;
 
@@ -34,8 +34,14 @@ function Body() {
 
   return (
     <>
+    <PageHero
+      eyebrow="Orders"
+      heading="Track Your Order"
+      blurb="Live status from payment to doorstep — enter the order number from your confirmation SMS or email."
+      badges={["✓ Live Status", "✓ Secure Lookup", "✓ WhatsApp Help"]}
+      image="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80"
+    />
     <div className="container-x max-w-2xl py-10 md:py-14">
-      <h1 className="section-title text-center">Track Your Order</h1>
       <p className="mt-1 text-center text-sm text-slate-500">Enter the order number from your confirmation (e.g. PL-20260101-1234).</p>
       <form onSubmit={track} className="card mt-6 flex gap-2 p-3">
         <input value={num} onChange={(e) => setNum(e.target.value)} placeholder="PL-…" className="input uppercase" />
@@ -67,7 +73,6 @@ function Body() {
         </div>
       )}
     </div>
-    <RepairCTA />
     </>
   );
 }

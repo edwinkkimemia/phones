@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Newspaper, ArrowRight, Clock } from "lucide-react";
+import { Newspaper, ArrowRight, Clock, ChevronRight } from "lucide-react";
 import AdSlot from "@/components/AdSlot";
-import RepairCTA from "@/components/RepairCTA";
+import PageHero from "@/components/PageHero";
 import { getPublishedPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
@@ -23,12 +23,19 @@ export default async function BlogPage() {
   const [first, ...rest] = posts;
   return (
     <>
+    <PageHero
+      eyebrow="Tech Blog Kenya"
+      heading="Tech Advice That Saves You Money"
+      blurb="Buying playbooks, deal alerts and repair guides — written by the team that sells and supports this tech daily."
+      badges={["✓ Buying Playbooks", "✓ Deal Alerts", "✓ Repair Guides"]}
+      image="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1600&q=80"
+    />
+    <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
+      <Link href="/" className="hover:text-brand-700">Home</Link>
+      <ChevronRight className="h-3 w-3" />
+      <span className="truncate font-semibold text-slate-800">Blog</span>
+    </nav>
     <div className="container-x py-8 md:py-12">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Blog</p>
-      <h1 className="section-title mt-1">Tech Advice That Saves You Money</h1>
-      <p className="mt-2 max-w-2xl text-sm text-slate-500">
-        Buying playbooks, deal alerts and repair guides — written by the team that sells and supports this tech daily.
-      </p>
       <AdSlot placement="BLOG" target="blog" bare className="mt-4" />
 
       {posts.length === 0 && (
@@ -77,7 +84,6 @@ export default async function BlogPage() {
         ))}
       </div>
     </div>
-    <RepairCTA />
     </>
   );
 }

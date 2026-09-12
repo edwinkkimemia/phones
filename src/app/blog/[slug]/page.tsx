@@ -2,10 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ChevronRight, Clock, Eye } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import AdSlot from "@/components/AdSlot";
-import RepairCTA from "@/components/RepairCTA";
+import PageHero from "@/components/PageHero";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
 import { getPublishedPost } from "@/lib/blog";
@@ -75,15 +75,21 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
   return (
     <>
+    <PageHero
+      eyebrow="Tech Blog Kenya"
+      heading={p.title}
+      blurb={p.excerpt}
+      badges={[`${mins} min read`, `${p.views.toLocaleString()} reads`, `Updated ${new Date(p.updatedAt).toLocaleDateString()}`]}
+    />
+    <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
+      <Link href="/" className="hover:text-brand-700">Home</Link>
+      <ChevronRight className="h-3 w-3" />
+      <Link href="/blog" className="hover:text-brand-700">Blog</Link>
+      <ChevronRight className="h-3 w-3" />
+      <span className="truncate font-semibold text-slate-800">{p.title}</span>
+    </nav>
     <div className="container-x py-8 md:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
-      <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
-        <Link href="/" className="hover:text-brand-700">Home</Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link href="/blog" className="hover:text-brand-700">Blog</Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="truncate font-semibold text-slate-800">{p.title}</span>
-      </nav>
       <AdSlot placement="BLOG" target={p.slug} bare />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -93,12 +99,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               <span key={t} className="chip">{t}</span>
             ))}
           </div>
-          <h1 className="font-display mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">{p.title}</h1>
-          <p className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {mins} min read</span>
-            <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {p.views.toLocaleString()} reads</span>
-            <span>Updated {new Date(p.updatedAt).toLocaleDateString()}</span>
-          </p>
 
           {p.cover && (
             <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-3xl">
@@ -177,7 +177,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </aside>
       </div>
     </div>
-    <RepairCTA />
     </>
   );
 }

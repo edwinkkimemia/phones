@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, ChevronRight } from "lucide-react";
 import AdSlot from "@/components/AdSlot";
-import RepairCTA from "@/components/RepairCTA";
+import PageHero from "@/components/PageHero";
 import { getPublishedGuides } from "@/lib/guides";
 
 export const metadata: Metadata = {
@@ -17,12 +17,19 @@ export default async function GuidesPage() {
   const guides = await getPublishedGuides();
   return (
     <>
+    <PageHero
+      eyebrow="Learn"
+      heading="Buying Guides for Kenya"
+      blurb="No jargon, no sponsored rankings — just honest advice from people who sell (and support) these devices every day."
+      badges={["✓ No Sponsored Rankings", "✓ Honest Price Bands", "✓ Expert Support"]}
+      image="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80"
+    />
+    <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
+      <Link href="/" className="hover:text-brand-700">Home</Link>
+      <ChevronRight className="h-3 w-3" />
+      <span className="truncate font-semibold text-slate-800">Guides</span>
+    </nav>
     <div className="container-x py-8 md:py-12">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Learn</p>
-      <h1 className="section-title mt-1">Buying Guides for Kenya</h1>
-      <p className="mt-2 max-w-2xl text-sm text-slate-500">
-        No jargon, no sponsored rankings — just honest advice from people who sell (and support) these devices every day.
-      </p>
       <AdSlot placement="GUIDES" target="guides" bare className="mt-4" />
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {guides.map((g) => (
@@ -47,7 +54,6 @@ export default async function GuidesPage() {
         ))}
       </div>
     </div>
-    <RepairCTA />
     </>
   );
 }

@@ -2,12 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ChevronRight, Clock } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getProduct } from "@/data/catalog";
 import ProductCard from "@/components/ProductCard";
 import ShareButtons from "@/components/ShareButtons";
 import AdSlot from "@/components/AdSlot";
-import RepairCTA from "@/components/RepairCTA";
+import PageHero from "@/components/PageHero";
 import { WhatsAppIcon } from "@/components/icons";
 import { faqJsonLd } from "@/lib/seo";
 import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
@@ -59,27 +59,26 @@ export default async function GuidePage({ params }: { params: { slug: string } }
 
   return (
     <>
+    <PageHero
+      eyebrow="Buying guide • Kenya"
+      heading={g.title}
+      blurb={g.description}
+      badges={[`${g.readMins} min read`, `Updated ${g.updated}`, "By PhoneLaptops experts"]}
+    />
+    <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
+      <Link href="/" className="hover:text-brand-700">Home</Link>
+      <ChevronRight className="h-3 w-3" />
+      <Link href="/guides" className="hover:text-brand-700">Guides</Link>
+      <ChevronRight className="h-3 w-3" />
+      <span className="truncate font-semibold text-slate-800">{g.title}</span>
+    </nav>
     <div className="container-x py-8 md:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(g.faqs)) }} />
-      <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
-        <Link href="/" className="hover:text-brand-700">Home</Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link href="/guides" className="hover:text-brand-700">Guides</Link>
-        <ChevronRight className="h-3 w-3" />
-        <span className="truncate font-semibold text-slate-800">{g.title}</span>
-      </nav>
       <AdSlot placement="GUIDES" target={g.slug} bare />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <article className="min-w-0">
-          <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Buying guide • Kenya</p>
-          <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{g.title}</h1>
-          <p className="mt-2 flex items-center gap-3 text-xs text-slate-400">
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {g.readMins} min read</span>
-            <span>Updated {g.updated}</span>
-            <span>By PhoneLaptops experts</span>
-          </p>
 
           {g.cover && (
             <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-3xl">
@@ -186,7 +185,6 @@ export default async function GuidePage({ params }: { params: { slug: string } }
         </aside>
       </div>
     </div>
-    <RepairCTA />
     </>
   );
 }
