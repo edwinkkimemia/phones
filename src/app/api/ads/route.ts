@@ -27,6 +27,9 @@ export async function GET(req: Request) {
 
   try {
     const now = new Date();
+    // NOTE: the parent-CATEGORY rows must be fetched here too — the tiering
+    // below filters this result set, so product pages only inherit their
+    // category's banners when those rows are included in the query.
     const ads = await prisma.adSlot.findMany({
       where: {
         active: true,
@@ -35,6 +38,12 @@ export async function GET(req: Request) {
           { placement: "GLOBAL" as never },
           { placement: placement as never, target },
           { placement: placement as never, target: "all" },
+          ...(category
+            ? [
+                { placement: "CATEGORY" as never, target: category },
+                { placement: "CATEGORY" as never, target: "all" },
+              ]
+            : []),
         ],
       },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],

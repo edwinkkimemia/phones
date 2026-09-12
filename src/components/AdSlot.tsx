@@ -32,6 +32,7 @@ export default function AdSlot({
   className?: string;
 }) {
   const [ad, setAd] = useState<AdT | null>(null);
+  const [badSrc, setBadSrc] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -72,7 +73,8 @@ export default function AdSlot({
     };
   }, [placement, target, category, format, index]);
 
-  if (!ad) return null;
+  // No image (or a broken one) → render nothing instead of an empty frame.
+  if (!ad || !ad.image || ad.image === badSrc) return null;
 
   const external = /^https?:\/\//i.test(ad.link);
   const inner = (
@@ -90,6 +92,7 @@ export default function AdSlot({
         src={ad.image}
         alt={ad.title}
         loading="lazy"
+        onError={() => setBadSrc(ad.image)}
         className={cn(
           "w-full object-cover transition duration-500 group-hover:scale-[1.02]",
           format === "SQUARE" ? "aspect-square" : "h-28 sm:h-36 md:h-44"

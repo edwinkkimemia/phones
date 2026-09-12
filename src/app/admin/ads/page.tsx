@@ -99,13 +99,15 @@ function SlotTester() {
   const [placement, setPlacement] = useState("CATEGORY");
   const [target, setTarget] = useState("laptops");
   const [category, setCategory] = useState("laptops");
+  const [format, setFormat] = useState("WIDE");
+  const [index, setIndex] = useState("0");
   const [result, setResult] = useState<{ ad?: { title: string; image: string; link: string }; candidates?: Resolved[] } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const test = async () => {
     setBusy(true);
     try {
-      const qs = new URLSearchParams({ placement, target: target.trim() || "all", format: "WIDE", index: "0" });
+      const qs = new URLSearchParams({ placement, target: target.trim() || "all", format, index });
       if (placement === "PRODUCT" && category.trim()) qs.set("category", category.trim());
       const res = await fetch(`/api/ads?${qs.toString()}`);
       setResult(await res.json());
@@ -119,8 +121,8 @@ function SlotTester() {
   return (
     <div className="card mt-4 p-5">
       <p className="flex items-center gap-2 font-extrabold"><FlaskConical className="h-4 w-4 text-brand-600" /> Test a slot</p>
-      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — including category inheritance on product pages.</p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-[160px_1fr_1fr_auto]">
+      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — including category inheritance on product pages. Match the slot's format: banners are WIDE, sidebars are SQUARE.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[130px_100px_70px_1fr_1fr_auto]">
         <select value={placement} onChange={(e) => setPlacement(e.target.value)} className="input !py-2 text-xs font-bold">
           <option value="HOMEPAGE">HOMEPAGE</option>
           <option value="CATEGORY">CATEGORY</option>
@@ -128,7 +130,19 @@ function SlotTester() {
           <option value="BLOG">BLOG</option>
           <option value="GUIDES">GUIDES</option>
         </select>
+        <select value={format} onChange={(e) => setFormat(e.target.value)} className="input !py-2 text-xs font-bold" aria-label="Format">
+          <option value="WIDE">WIDE</option>
+          <option value="SQUARE">SQUARE</option>
+        </select>
         <AdTargetInput placement={placement} value={target} onChange={setTarget} className="input !py-2 text-xs font-bold" />
+        <input
+          value={index}
+          onChange={(e) => setIndex(e.target.value.replace(/\D/g, "") || "0")}
+          className="input !py-2 text-xs font-bold"
+          aria-label="Slot index"
+          title="Slot index (0 = first, 1 = second stacked sidebar slot)"
+          inputMode="numeric"
+        />
         {placement === "PRODUCT" && (
           <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="product's category" className="input !py-2 text-xs font-bold" />
         )}
