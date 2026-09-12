@@ -62,6 +62,9 @@ and in the sidebar on blog articles and buying guides.
 - **Priority** — lowest number wins when several ads match the same slot.
 - Exact matches beat wildcards (`all`), which beat GLOBAL.
 - Use **Pause** instead of delete for seasonal creatives you will reuse.
+- **Duplicate** (⧉ icon on any ad, or the button on the edit page) copies a
+  creative so you never start from scratch — the copy starts paused with
+  " (copy)" in the title; retarget it, then enable.
 - **Images must load** — the new/edit form checks the creative URL before
   publishing (and the API re-checks on save). Prefer uploading; external
   hotlinks rot. **Live slot previews** on the Ads page show every key slot

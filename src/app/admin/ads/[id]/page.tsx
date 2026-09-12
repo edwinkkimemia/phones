@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Trash2 } from "lucide-react";
+import { ChevronRight, Trash2, Copy } from "lucide-react";
 import ImageUploader from "@/components/ImageUploader";
 import AdTargetInput from "@/components/AdTargetInput";
 import { probeImage } from "@/lib/image-probe";
@@ -122,6 +122,22 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
           </div>
           <div className="flex gap-2">
             <button onClick={save} disabled={saving} className="btn-primary !py-2.5 text-sm disabled:opacity-60">{saving ? "Saving…" : "Save changes"}</button>
+            <button
+              onClick={async () => {
+                const res = await fetch("/api/ads", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ duplicateId: form.id }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ad?.id) router.push(`/admin/ads/${data.ad.id}`);
+                else setMsg(data.error ?? "Duplicate failed");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:border-brand-300 hover:text-brand-700"
+              title="Copy this ad (starts paused — retarget, then enable)"
+            >
+              <Copy className="h-4 w-4" /> Duplicate
+            </button>
             <button
               onClick={async () => {
                 if (!confirm(`Delete “${form.title}”?`)) return;

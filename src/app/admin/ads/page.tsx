@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, FlaskConical, BarChart3, MonitorPlay } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Trash2, RotateCcw, FlaskConical, BarChart3, MonitorPlay, Copy } from "lucide-react";
 import AdTargetInput, { targetLabel } from "@/components/AdTargetInput";
 
 interface Ad {
@@ -22,6 +23,16 @@ async function patchAd(id: string, patch: Record<string, unknown>) {
 
 function AdRow({ a, cats, reload }: { a: Ad; cats: { slug: string; name: string }[]; reload: () => void }) {
   const [target, setTarget] = useState(a.target);
+  const router = useRouter();
+  const duplicate = async () => {
+    const res = await fetch("/api/ads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ duplicateId: a.id }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.ad?.id) router.push(`/admin/ads/${data.ad.id}`);
+  };
   return (
     <div className="card space-y-2.5 p-3.5 text-sm">
       <div className="flex items-center gap-3">
@@ -38,6 +49,14 @@ function AdRow({ a, cats, reload }: { a: Ad; cats: { slug: string; name: string 
           className="btn-ghost !px-3 !py-1.5 text-xs"
         >
           {a.active ? "Pause" : "Enable"}
+        </button>
+        <button
+          onClick={duplicate}
+          className="rounded-lg p-2 text-slate-400 hover:bg-brand-50 hover:text-brand-700"
+          aria-label="Duplicate"
+          title="Duplicate (starts paused — retarget, then enable)"
+        >
+          <Copy className="h-4 w-4" />
         </button>
         <button
           onClick={async () => { if (!confirm(`Delete “${a.title}”?`)) return; await fetch(`/api/ads?id=${encodeURIComponent(a.id)}`, { method: "DELETE" }); reload(); }}

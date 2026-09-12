@@ -173,6 +173,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
     }
   }
+  const raw = await req.json().catch(() => null);
+  // Duplicate flow: copy an existing ad so admins never start from scratch.
+  // Copies start paused (same creative, title + " (copy)") — enable after retargeting.
+  if (raw && typeof raw === "object" && typeof (raw as { duplicateId?: unknown }).duplicateId === "string") {
+    try {
+      const src = await prisma.adSlot.findUnique({
+        where: { id: (raw as { duplicateId: string }).duplicateId },
+      });
+      if (!src) return NextResponse.json({ error: "Original ad not found" }, { status: 404 });
+      const copy = await prisma.adSlot.create({
+        data: {
+          title: `${src.title} (copy)`,
+          image: src.image,
+          link: src.link,
+          placement: src.placement,
+          target: src.target,
+          format: src.format,
+          active: false,
+          sortOrder: src.sortOrder,
+          startsAt: src.startsAt,
+          endsAt: src.endsAt,
+        },
+      });
+      return NextResponse.json({ ad: copy });
+    } catch {
+      return NextResponse.json({ error: "Duplicate failed" }, { status: 400 });
+    }
+  }
   const Body = z.object({
     title: z.string().min(3),
     image: z.string().url(),
@@ -181,7 +209,7 @@ export async function POST(req: Request) {
     target: z.string().min(1),
     format: z.enum(["WIDE", "SQUARE"]).default("WIDE"),
   });
-  const parsed = Body.safeParse(await req.json().catch(() => null));
+  const parsed = Body.safeParse(raw);
   if (!parsed.success) return NextResponse.json({ error: "Invalid ad data" }, { status: 400 });
   // Normalize target: slugs are lowercase — "Laptops" must still match "laptops".
   parsed.data.target = parsed.data.target.trim().toLowerCase() || "all";

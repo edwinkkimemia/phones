@@ -80,6 +80,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       heading={p.title}
       blurb={p.excerpt}
       badges={[`${mins} min read`, `${p.views.toLocaleString()} reads`, `Updated ${new Date(p.updatedAt).toLocaleDateString()}`]}
+      image={p.cover ?? undefined}
     />
     <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
       <Link href="/" className="hover:text-brand-700">Home</Link>
@@ -99,12 +100,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               <span key={t} className="chip">{t}</span>
             ))}
           </div>
-
-          {p.cover && (
-            <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-3xl">
-              <Image src={p.cover} alt={p.title} fill sizes="800px" className="object-cover" priority />
-            </div>
-          )}
 
           <div className="richtext mt-6 !text-[16px]" dangerouslySetInnerHTML={{ __html: p.body }} />
 

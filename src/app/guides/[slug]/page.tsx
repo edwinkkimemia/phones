@@ -64,6 +64,7 @@ export default async function GuidePage({ params }: { params: { slug: string } }
       heading={g.title}
       blurb={g.description}
       badges={[`${g.readMins} min read`, `Updated ${g.updated}`, "By PhoneLaptops experts"]}
+      image={g.cover ?? undefined}
     />
     <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
       <Link href="/" className="hover:text-brand-700">Home</Link>
@@ -79,12 +80,6 @@ export default async function GuidePage({ params }: { params: { slug: string } }
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <article className="min-w-0">
-
-          {g.cover && (
-            <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-3xl">
-              <Image src={g.cover} alt={g.title} fill sizes="800px" className="object-cover" priority />
-            </div>
-          )}
 
           <p className="richtext mt-5 !text-base">{g.intro}</p>
 
