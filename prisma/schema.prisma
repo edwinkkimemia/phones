@@ -1,0 +1,333 @@
+// PhoneLaptops.co.ke — PostgreSQL data model (Prisma)
+// Domains kept independent: catalog / inventory / customers / orders / payments / promotions / content
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum ProductCondition {
+  NEW
+  PRE_OWNED
+  REFURBISHED
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+  PREORDER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  INITIATED
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  MPESA
+  CARD
+  PAY_ON_DELIVERY
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String?  @unique
+  phone        String?  @unique
+  passwordHash String?
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+  reviews      Review[]
+  accounts     Account[]
+  sessions     Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  tagline     String?
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  logo     String?
+  products Product[]
+}
+
+model Product {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  name           String
+  brandId        String?
+  brand          Brand?            @relation(fields: [brandId], references: [id])
+  categoryId     String?
+  category       Category?         @relation(fields: [categoryId], references: [id])
+  tagline        String?
+  description    String            @db.Text
+  price          Int // minor units (KES cents not used — store whole KES)
+  compareAtPrice Int?
+  condition      ProductCondition  @default(NEW)
+  stockQty       Int               @default(0)
+  stockStatus    StockStatus       @default(IN_STOCK)
+  rating         Float             @default(0)
+  reviewCount    Int               @default(0)
+  soldCount      Int               @default(0)
+  isFeatured     Boolean           @default(false)
+  isDeal         Boolean           @default(false)
+  isNew          Boolean           @default(false)
+  isBestSeller   Boolean           @default(false)
+  images         ProductImage[]
+  variants       ProductVariant[]
+  specs          ProductSpec[]
+  reviews        Review[]
+  orderItems     OrderItem[]
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([categoryId, brandId, price, rating, soldCount, createdAt])
+  @@index([slug])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String // e.g. "Storage", "Colour"
+  value     String // e.g. "256GB", "Midnight"
+  priceDelta Int    @default(0)
+  stockQty  Int     @default(0)
+  sku       String?
+}
+
+model ProductSpec {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  group     String  @default("General")
+  key       String
+  value     String
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  county    String?
+  town      String?
+  address   String?
+  landmark  String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod @default(MPESA)
+  subtotal      Int
+  deliveryFee   Int           @default(0)
+  discount      Int           @default(0)
+  total         Int
+  county        String?
+  town          String?
+  address       String?
+  phone         String?
+  notes         String?
+  items         OrderItem[]
+  payments      Payment[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status, paymentStatus, createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Int
+  qty       Int
+  image     String?
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method          PaymentMethod @default(MPESA)
+  status          PaymentStatus @default(PENDING)
+  amount          Int
+  phone           String?
+  mpesaReceipt    String?
+  checkoutRequestId String?
+  rawCallback     Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model PromoCode {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  type        DiscountType @default(PERCENTAGE)
+  value       Int
+  minSubtotal Int          @default(0)
+  active      Boolean      @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  usageLimit  Int?
+  usedCount   Int          @default(0)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  rating    Int
+  title     String?
+  body      String   @db.Text
+  verified  Boolean  @default(false)
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model DeliveryZone {
+  id        String  @id @default(cuid())
+  county    String
+  town      String
+  fee       Int     @default(0)
+  eta       String?
+  active    Boolean @default(true)
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String?
+  body      String?  @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+enum AdPlacement {
+  GLOBAL
+  HOMEPAGE
+  CATEGORY
+  PRODUCT
+}
+
+enum AdFormat {
+  WIDE
+  SQUARE
+}
+
+// Full-width image ads, managed from /admin.
+// targeting: GLOBAL shows everywhere; CATEGORY targets a category slug
+// (or "all"); PRODUCT targets a product slug (or "all").
+model AdSlot {
+  id        String      @id @default(cuid())
+  title     String
+  image     String
+  link      String      @default("/deals")
+  placement AdPlacement @default(GLOBAL)
+  target    String      @default("all")
+  format    AdFormat    @default(WIDE)
+  active    Boolean     @default(true)
+  sortOrder Int         @default(0)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime    @default(now())
+}
