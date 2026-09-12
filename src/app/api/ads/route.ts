@@ -3,12 +3,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 
-// GET /api/ads?placement=CATEGORY|PRODUCT|GLOBAL&target=slug&format=WIDE|SQUARE&index=0
-// Exact match wins; falls back to GLOBAL. `index` picks the nth candidate (for stacked slots).
+// GET /api/ads?placement=CATEGORY|PRODUCT|GLOBAL&target=slug&category=cat&format=WIDE|SQUARE&index=0
+// Tiered: exact → wildcard → parent CATEGORY (for product pages) → GLOBAL.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const placement = (searchParams.get("placement") ?? "GLOBAL").toUpperCase();
   const target = (searchParams.get("target") ?? "all").trim().toLowerCase() || "all";
+  const category = (searchParams.get("category") ?? "").trim().toLowerCase();
   const format = (searchParams.get("format") ?? "WIDE").toUpperCase();
   const index = Math.max(0, Number(searchParams.get("index") ?? 0) || 0);
 
@@ -42,11 +43,18 @@ export async function GET(req: Request) {
       (a) =>
         (!a.startsAt || a.startsAt <= now) && (!a.endsAt || a.endsAt >= now)
     );
-    // All matching ads, tiered: exact target → wildcard → global.
+    // All matching ads, tiered: exact target → wildcard → parent
+    // category (so products inherit their category's banners) → global.
     // findMany is already sortOrder-ordered, so priority holds within tiers.
     const candidates = [
       ...live.filter((a) => a.placement === placement && a.target === target),
       ...live.filter((a) => a.placement === placement && a.target === "all"),
+      ...(category
+        ? live.filter((a) => a.placement === "CATEGORY" && a.target === category)
+        : []),
+      ...(category
+        ? live.filter((a) => a.placement === "CATEGORY" && a.target === "all")
+        : []),
       ...live.filter((a) => a.placement === "GLOBAL"),
     ];
     const slim = (a: (typeof candidates)[number]) => ({

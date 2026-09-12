@@ -87,7 +87,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
 
   return (
     <>
-    <AdSlot placement="PRODUCT" target={product.slug} />
+    <AdSlot placement="PRODUCT" target={product.slug} category={product.category} />
     <div className="container-x py-6 md:py-10">
       <nav className="flex items-center gap-1 text-xs text-slate-500">
         <Link href="/" className="hover:text-brand-700">Home</Link>
@@ -281,8 +281,8 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
           <div>
             <p className="label">Sponsored</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <AdSlot placement="PRODUCT" target={product.slug} format="SQUARE" />
-              <AdSlot placement="PRODUCT" target={product.slug} format="SQUARE" index={1} />
+              <AdSlot placement="PRODUCT" target={product.slug} category={product.category} format="SQUARE" />
+              <AdSlot placement="PRODUCT" target={product.slug} category={product.category} format="SQUARE" index={1} />
             </div>
           </div>
         </aside>

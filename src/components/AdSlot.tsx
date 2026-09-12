@@ -16,6 +16,7 @@ export interface AdT {
 export default function AdSlot({
   placement,
   target = "all",
+  category,
   format = "WIDE",
   index = 0,
   bare = false,
@@ -23,6 +24,7 @@ export default function AdSlot({
 }: {
   placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT";
   target?: string;
+  category?: string;
   format?: "WIDE" | "SQUARE";
   index?: number;
   bare?: boolean;
@@ -32,9 +34,9 @@ export default function AdSlot({
 
   useEffect(() => {
     let live = true;
-    fetch(
-      `/api/ads?placement=${placement}&target=${encodeURIComponent(target)}&format=${format}&index=${index}`
-    )
+    const qs = new URLSearchParams({ placement, target, format, index: String(index) });
+    if (category) qs.set("category", category);
+    fetch(`/api/ads?${qs.toString()}`)
       .then((r) => r.json())
       .then((d) => {
         if (live) setAd(d.ad ?? null);
@@ -43,7 +45,7 @@ export default function AdSlot({
     return () => {
       live = false;
     };
-  }, [placement, target, format, index]);
+  }, [placement, target, category, format, index]);
 
   if (!ad) return null;
 

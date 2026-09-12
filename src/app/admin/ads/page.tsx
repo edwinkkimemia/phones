@@ -96,15 +96,16 @@ interface Resolved {
 function SlotTester() {
   const [placement, setPlacement] = useState("CATEGORY");
   const [target, setTarget] = useState("laptops");
+  const [category, setCategory] = useState("laptops");
   const [result, setResult] = useState<{ ad?: { title: string; image: string; link: string }; candidates?: Resolved[] } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const test = async () => {
     setBusy(true);
     try {
-      const res = await fetch(
-        `/api/ads?placement=${placement}&target=${encodeURIComponent(target.trim() || "all")}&format=WIDE&index=0`
-      );
+      const qs = new URLSearchParams({ placement, target: target.trim() || "all", format: "WIDE", index: "0" });
+      if (placement === "PRODUCT" && category.trim()) qs.set("category", category.trim());
+      const res = await fetch(`/api/ads?${qs.toString()}`);
       setResult(await res.json());
     } catch {
       setResult(null);
@@ -116,14 +117,17 @@ function SlotTester() {
   return (
     <div className="card mt-4 p-5">
       <p className="flex items-center gap-2 font-extrabold"><FlaskConical className="h-4 w-4 text-brand-600" /> Test a slot</p>
-      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — no guessing.</p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-[160px_1fr_auto]">
+      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — including category inheritance on product pages.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[160px_1fr_1fr_auto]">
         <select value={placement} onChange={(e) => setPlacement(e.target.value)} className="input !py-2 text-xs font-bold">
           <option value="HOMEPAGE">HOMEPAGE</option>
           <option value="CATEGORY">CATEGORY</option>
           <option value="PRODUCT">PRODUCT</option>
         </select>
         <AdTargetInput placement={placement} value={target} onChange={setTarget} className="input !py-2 text-xs font-bold" />
+        {placement === "PRODUCT" && (
+          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="product's category" className="input !py-2 text-xs font-bold" />
+        )}
         <button onClick={test} disabled={busy} className="btn-primary !py-2 text-xs disabled:opacity-60">
           {busy ? "Checking…" : "Check"}
         </button>
@@ -199,10 +203,33 @@ export default function AdminAds() {
       </div>
       {msg && <p className="mt-2 text-xs font-bold text-slate-600">{msg}</p>}
 
-      <div className="mt-4 space-y-2.5">
-        {ads.map((a) => (
-          <AdRow key={a.id} a={a} cats={cats} reload={load} />
-        ))}
+      <div className="mt-4 space-y-5">
+        {(
+          [
+            { title: "Homepage", desc: "Between homepage sections (below-hero, below-deals, above-footer).", match: (a: Ad) => a.placement === "HOMEPAGE" },
+            { title: "Category banners", desc: "Wide banners above the breadcrumb on category pages — inherited by their products.", match: (a: Ad) => a.placement === "CATEGORY" && (a.format ?? "WIDE") === "WIDE" },
+            { title: "Product sidebar", desc: "Square ads below “Still deciding?” on product pages.", match: (a: Ad) => (a.format ?? "WIDE") === "SQUARE" },
+            { title: "Product-specific", desc: "Wide banners pinned to one product page.", match: (a: Ad) => a.placement === "PRODUCT" && (a.format ?? "WIDE") === "WIDE" },
+            { title: "Global fallback", desc: "Shown anywhere nothing more specific matches.", match: (a: Ad) => a.placement === "GLOBAL" },
+          ] as const
+        ).map((g) => {
+          const rows = ads.filter(g.match);
+          if (rows.length === 0) return null;
+          return (
+            <section key={g.title}>
+              <div className="flex items-baseline gap-2">
+                <h2 className="font-extrabold">{g.title}</h2>
+                <span className="chip">{rows.length}</span>
+              </div>
+              <p className="mt-0.5 text-xs text-slate-500">{g.desc}</p>
+              <div className="mt-2 space-y-2.5">
+                {rows.map((a) => (
+                  <AdRow key={a.id} a={a} cats={cats} reload={load} />
+                ))}
+              </div>
+            </section>
+          );
+        })}
         {ads.length === 0 && <div className="card p-8 text-center text-sm text-slate-400">No ads yet — create your first one.</div>}
       </div>
 

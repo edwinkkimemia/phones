@@ -41,11 +41,15 @@ Shown in the product-page sidebar below “Still deciding?” (two stacked).
 
 ## Publishing (admin)
 
-`/admin` → **Ads & Banners** → **New ad**:
+/admin → **Ads & Banners** → **New ad**:
 
 - **Shows on** — GLOBAL (everywhere), HOMEPAGE (section), CATEGORY or PRODUCT.
 - **Target** — `below-hero` / `below-deals` / `above-footer` for homepage,
   a category slug (e.g. `laptops`) or product slug for the rest, or `all`.
+  Suggestions appear as you type; matching ignores case and spaces.
+- **Inheritance** — products automatically show their parent category's banners
+  (wide above the breadcrumb, square in the sidebar) unless a product-specific
+  ad outranks them. Priority order: exact product → category → global.
 - **Priority** — lowest number wins when several ads match the same slot.
 - Exact matches beat wildcards (`all`), which beat GLOBAL.
 - Use **Pause** instead of delete for seasonal creatives you will reuse.
