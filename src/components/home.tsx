@@ -2,25 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Truck, MessageCircle, CreditCard, ShieldCheck, Star } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
-import { kes, savings } from "@/lib/utils";
 import { pickDaily } from "@/lib/rotation";
+import { HeroFeatures, ShuffleGrid } from "@/components/RotatingShowcase";
 import { CATEGORIES, PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
 import ProductCard from "@/components/ProductCard";
-import { Price } from "@/components/ui";
 
 // Curated order for the hero logo ticker (all have files in public/brand).
 const heroBrands = ["HP", "Apple", "Samsung", "Lenovo", "Dell", "ASUS", "Xiaomi", "Tecno", "Anker", "JBL", "Oraimo", "Infinix"];
 
 export function Hero() {
-  // The two feature spots rotate daily among featured products.
-  const [featured, second] = pickDaily(
-    PRODUCTS.filter((p) => p.isFeatured && p.stockStatus !== "OUT_OF_STOCK"),
-    2,
-    "hero"
-  );
-  const iphone = second ?? PRODUCTS.find((p) => p.slug === "iphone-17-pro-256gb")!;
-  const heroMain = featured ?? PRODUCTS[0];
-  const save = savings(heroMain.price, heroMain.compareAtPrice);
+  // Server picks for first paint; HeroFeatures reshuffles on every load.
+  const featuredPool = PRODUCTS.filter((p) => p.isFeatured);
+  const serverPicks = pickDaily(featuredPool, 2, "hero");
   return (
     <section className="relative overflow-hidden bg-ink-950 text-white">
       <Image
@@ -81,47 +74,10 @@ export function Hero() {
         </div>
 
         <div className="relative">
-          <div className="grid grid-cols-5 gap-3">
-            <div className="card col-span-3 overflow-hidden !border-white/10 !bg-white/5 p-3 backdrop-blur">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
-                <Image
-                  src={heroMain.images[0].url}
-                  alt={heroMain.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                {save !== null ? (
-                  <span className="absolute left-2 top-2 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-extrabold text-white">
-                    SAVE {kes(save)}
-                  </span>
-                ) : (
-                  <span className="absolute left-2 top-2 rounded-lg bg-brand-600 px-2 py-1 text-[11px] font-extrabold text-white">
-                    FEATURED
-                  </span>
-                )}
-              </div>
-              <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-brand-300">{heroMain.brand} • {heroMain.categoryLabel}</p>
-              <p className="truncate text-sm font-bold">{heroMain.name}</p>
-              <Price price={heroMain.price} compareAt={heroMain.compareAtPrice} size="sm" className="mt-1 [&_span]:!text-white" />
-              <Link href={`/${heroMain.category}/${heroMain.slug}`} className="btn-primary mt-3 w-full !py-2.5 text-xs">Buy Now</Link>
-            </div>
-            <div className="col-span-2 flex flex-col gap-3">
-              <div className="card float-y flex-1 overflow-hidden !border-white/10 !bg-white/5 p-3 backdrop-blur">
-                <div className="relative aspect-square overflow-hidden rounded-xl">
-                  <Image src={iphone.images[0].url} alt={iphone.name} fill className="object-cover" />
-                </div>
-                <p className="mt-2 truncate text-[11px] font-bold text-brand-300">{iphone.isNew ? "NEW • " : ""}{iphone.brand} {iphone.categoryLabel}</p>
-                <p className="text-xs font-bold">{kes(iphone.price)}</p>
-                <Link href={`/${iphone.category}/${iphone.slug}`} className="mt-2 block text-center rounded-lg bg-white/10 py-2 text-[11px] font-bold hover:bg-white/20">
-                  View
-                </Link>
-              </div>
-              <div className="rounded-2xl border border-accent/30 bg-accent/10 p-3">
-                <p className="flex items-center gap-1 text-xs font-extrabold text-accent"><Star className="h-3.5 w-3.5 fill-current" /> 4.9/5</p>
-                <p className="mt-1 text-[11px] leading-snug text-slate-300">12,400+ verified reviews from buyers across Kenya</p>
-              </div>
-            </div>
+          <HeroFeatures pool={featuredPool} initial={serverPicks} />
+          <div className="mt-3 rounded-2xl border border-accent/30 bg-accent/10 p-3">
+            <p className="flex items-center gap-1 text-xs font-extrabold text-accent"><Star className="h-3.5 w-3.5 fill-current" /> 4.9/5</p>
+            <p className="mt-1 text-[11px] leading-snug text-slate-300">12,400+ verified reviews from buyers across Kenya</p>
           </div>
         </div>
       </div>
@@ -236,11 +192,7 @@ export function ProductRow({
             View all <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {items.slice(0, 4).map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        <ShuffleGrid items={items} />
       </div>
     </section>
   );
