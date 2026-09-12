@@ -77,14 +77,15 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const denied = await requireAdmin();
   if (denied) return denied;
-  // Restore missing defaults (idempotent — never overwrites admin edits).
+  // Restore missing defaults (idempotent). Known default ids are also
+  // re-enabled — custom ads are never touched.
   if (new URL(req.url).searchParams.get("restore") === "1") {
     const { ALL_DEFAULT_ADS } = await import("@/data/default-ads");
     try {
       for (const a of ALL_DEFAULT_ADS) {
         await prisma.adSlot.upsert({
           where: { id: a.id },
-          update: {},
+          update: { active: true },
           create: { ...a, placement: a.placement as never, format: a.format as never },
         });
       }
