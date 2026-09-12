@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useWishlist } from "@/lib/store";
 import { kes } from "@/lib/utils";
+import PasswordInput from "@/components/PasswordInput";
 
 interface Order {
   id: string; orderNumber: string; status: string; paymentStatus: string;
@@ -51,9 +52,9 @@ function Security() {
     <form onSubmit={submit} className="card space-y-3 p-5">
       <p className="flex items-center gap-2 font-extrabold"><KeyRound className="h-4 w-4 text-brand-600" /> Security</p>
       <div className="grid gap-2.5 sm:grid-cols-3">
-        <input className="input !py-2.5 text-sm" type="password" placeholder="Current password" value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} required autoComplete="current-password" />
-        <input className="input !py-2.5 text-sm" type="password" placeholder="New (min 8)" value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} required minLength={8} autoComplete="new-password" />
-        <input className="input !py-2.5 text-sm" type="password" placeholder="Confirm new" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required minLength={8} autoComplete="new-password" />
+        <PasswordInput label={undefined} value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} placeholder="Current password" required autoComplete="current-password" />
+        <PasswordInput value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} placeholder="New (min 8)" required minLength={8} autoComplete="new-password" />
+        <PasswordInput value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} placeholder="Confirm new" required minLength={8} autoComplete="new-password" />
       </div>
       <div className="flex items-center gap-3">
         <button disabled={busy} className="btn-ghost !py-2 text-xs disabled:opacity-60">{busy ? "Saving…" : "Change password"}</button>

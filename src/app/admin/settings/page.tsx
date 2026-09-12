@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, Save, KeyRound, Loader2 } from "lucide-react";
 import { kes } from "@/lib/utils";
 import { SITE_FIELDS } from "@/lib/site-settings";
+import PasswordInput from "@/components/PasswordInput";
 
 interface Zone {
   id: string; county: string; town: string; fee: number; eta?: string | null; active: boolean;
@@ -157,9 +158,9 @@ function ChangePassword() {
         <p className="text-xs text-slate-500">Signed in as this admin account. Minimum 8 characters.</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <div><label className="label">Current password</label><input className="input" type="password" value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} required autoComplete="current-password" /></div>
-        <div><label className="label">New password</label><input className="input" type="password" value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} required minLength={8} autoComplete="new-password" /></div>
-        <div><label className="label">Confirm new password</label><input className="input" type="password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required minLength={8} autoComplete="new-password" /></div>
+        <PasswordInput label="Current password" value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} required autoComplete="current-password" />
+        <PasswordInput label="New password" value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} required minLength={8} autoComplete="new-password" />
+        <PasswordInput label="Confirm new password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required minLength={8} autoComplete="new-password" />
       </div>
       <div className="flex items-center gap-3">
         <button disabled={saving} className="btn-accent !py-2.5 text-sm disabled:opacity-60">
