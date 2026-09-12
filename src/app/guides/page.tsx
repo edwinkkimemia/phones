@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { ArrowRight, Clock } from "lucide-react";
 import AdSlot from "@/components/AdSlot";
+import RepairCTA from "@/components/RepairCTA";
 import { getPublishedGuides } from "@/lib/guides";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default async function GuidesPage() {
   const guides = await getPublishedGuides();
   return (
+    <>
     <div className="container-x py-8 md:py-12">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Learn</p>
       <h1 className="section-title mt-1">Buying Guides for Kenya</h1>
@@ -45,5 +47,7 @@ export default async function GuidesPage() {
         ))}
       </div>
     </div>
+    <RepairCTA />
+    </>
   );
 }

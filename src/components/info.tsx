@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Truck, ShieldCheck, RotateCcw, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
 import { faqJsonLd } from "@/lib/seo";
+import RepairCTA from "@/components/RepairCTA";
+import ContactForm from "@/components/ContactForm";
 
 function Shell({ title, kicker, children }: { title: string; kicker: string; children: React.ReactNode }) {
   return (
@@ -25,6 +27,7 @@ export function DeliveryPage() {
     ["Other towns (courier)", "2–3 days"],
   ];
   return (
+    <>
     <Shell title="We Deliver Across Kenya" kicker="Delivery information">
       <p className="flex items-center gap-2 font-bold text-slate-900"><Truck className="h-5 w-5 text-brand-600" /> Fast, tracked, reliable</p>
       <p>Order before 3pm for same-day dispatch in Nairobi. All parcels are packed securely, insured in transit and confirmed by phone before dispatch.</p>
@@ -35,11 +38,14 @@ export function DeliveryPage() {
       <p className="text-sm text-slate-500">Exact delivery fees are configured per zone and always shown at checkout before you pay. Pay with M-Pesa or on delivery where available.</p>
       <Link href="/track-order" className="btn-primary w-fit">Track My Order</Link>
     </Shell>
+    <RepairCTA />
+    </>
   );
 }
 
 export function ContactPage() {
   return (
+    <>
     <Shell title="Talk to a Real Human" kicker="Contact us">
       <div className="grid gap-3 sm:grid-cols-3">
         <a href="tel:+254715135141" className="card p-4 text-center"><Phone className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">+254 715 135 141</p><p className="text-xs text-slate-500">8am–8pm daily</p></a>
@@ -47,22 +53,29 @@ export function ContactPage() {
         <a href="mailto:support@phonelaptops.co.ke" className="card p-4 text-center"><Mail className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">Email</p><p className="text-xs text-slate-500">Replies within hours</p></a>
       </div>
       <p className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4" /> Moi Avenue, Nairobi, Kenya — pickup available after phone confirmation.</p>
+      <ContactForm />
     </Shell>
+    <RepairCTA />
+    </>
   );
 }
 
 export function AboutPage() {
   return (
+    <>
     <Shell title="Your Trusted Technology Store" kicker="About PhoneLaptops">
       <p><strong className="text-slate-900">PhoneLaptops.co.ke</strong> exists for one reason: to make buying genuine tech in Kenya simple, fairly priced and stress-free.</p>
       <p>We stock the latest laptops, iPhones, smartphones, tablets and accessories — every unit sourced from trusted suppliers, clearly graded (Brand New vs Pre-Owned), covered by warranty and delivered across Kenya.</p>
       <p><strong className="text-slate-900">Latest Tech. Honest Prices. Delivered.</strong> That is the promise on every order: authentic products, M-Pesa convenience, WhatsApp support from people who know devices, and after-sales help if anything goes wrong.</p>
     </Shell>
+    <RepairCTA />
+    </>
   );
 }
 
 export function WarrantyPage() {
   return (
+    <>
     <Shell title="Warranty, Returns & Support" kicker="Peace of mind">
       <p className="flex items-center gap-2 font-bold text-slate-900"><ShieldCheck className="h-5 w-5 text-emerald-600" /> Clear warranty on every product</p>
       <ul className="list-disc space-y-1.5 pl-5">
@@ -74,6 +87,8 @@ export function WarrantyPage() {
       <p>Dead on arrival? Contact us within 7 days with photos/video and we will replace or refund after verification. Items must be returned with all accessories and packaging.</p>
       <p className="text-sm text-slate-500">To claim: WhatsApp 0715 135 141 with your order number, product and a description of the issue. Keep your receipt.</p>
     </Shell>
+    <RepairCTA />
+    </>
   );
 }
 
@@ -87,6 +102,7 @@ export function FaqPage() {
     ["What if my item develops a problem?", "Contact us within the warranty period with your order number. We diagnose, repair, replace or refund per the warranty terms."],
   ];
   return (
+    <>
     <Shell title="Frequently Asked Questions" kicker="FAQs">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }} />
       {faqs.map(([q, a]) => (
@@ -96,6 +112,8 @@ export function FaqPage() {
         </div>
       ))}
     </Shell>
+    <RepairCTA />
+    </>
   );
 }
 

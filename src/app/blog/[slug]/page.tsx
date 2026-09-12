@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { ChevronRight, Clock, Eye } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import AdSlot from "@/components/AdSlot";
+import RepairCTA from "@/components/RepairCTA";
 import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
 import { getPublishedPost } from "@/lib/blog";
@@ -73,6 +74,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   };
 
   return (
+    <>
     <div className="container-x py-8 md:py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
       <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
@@ -175,5 +177,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </aside>
       </div>
     </div>
+    <RepairCTA />
+    </>
   );
 }

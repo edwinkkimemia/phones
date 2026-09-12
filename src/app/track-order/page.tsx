@@ -3,6 +3,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PackageSearch, Loader2 } from "lucide-react";
 import { kes } from "@/lib/utils";
+import RepairCTA from "@/components/RepairCTA";
 
 const STEPS = ["PENDING", "PAID", "PROCESSING", "DISPATCHED", "DELIVERED"] as const;
 
@@ -32,6 +33,7 @@ function Body() {
   const stepIdx = result ? STEPS.indexOf(result.status as (typeof STEPS)[number]) : -1;
 
   return (
+    <>
     <div className="container-x max-w-2xl py-10 md:py-14">
       <h1 className="section-title text-center">Track Your Order</h1>
       <p className="mt-1 text-center text-sm text-slate-500">Enter the order number from your confirmation (e.g. PL-20260101-1234).</p>
@@ -65,6 +67,8 @@ function Body() {
         </div>
       )}
     </div>
+    <RepairCTA />
+    </>
   );
 }
 

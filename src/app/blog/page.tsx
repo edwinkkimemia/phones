@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Newspaper, ArrowRight, Clock } from "lucide-react";
 import AdSlot from "@/components/AdSlot";
+import RepairCTA from "@/components/RepairCTA";
 import { getPublishedPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default async function BlogPage() {
   const posts = await getPublishedPosts();
   const [first, ...rest] = posts;
   return (
+    <>
     <div className="container-x py-8 md:py-12">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Blog</p>
       <h1 className="section-title mt-1">Tech Advice That Saves You Money</h1>
@@ -75,5 +77,7 @@ export default async function BlogPage() {
         ))}
       </div>
     </div>
+    <RepairCTA />
+    </>
   );
 }
