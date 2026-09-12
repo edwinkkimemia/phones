@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Truck, ShieldCheck, RotateCcw, Phone, Mail, MapPin, ChevronRight } from "lucide-react";
+import { Truck, ShieldCheck, RotateCcw, Phone, Mail, MapPin, ChevronRight, BadgeCheck, Tag, FileCheck, Undo2 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
 import { faqJsonLd } from "@/lib/seo";
 import PageHero from "@/components/PageHero";
@@ -59,6 +59,11 @@ export function DeliveryPage() {
 }
 
 export function ContactPage() {
+  const steps: [string, string][] = [
+    ["1", "Send your message below — it opens in WhatsApp, addressed and ready to send."],
+    ["2", "A specialist replies in minutes (8am–8pm daily) — often with photos, prices and options."],
+    ["3", "We resolve it: order help, a product link, a fitting check or a warranty claim started."],
+  ];
   return (
     <>
       <PageHero
@@ -77,12 +82,35 @@ export function ContactPage() {
         </div>
         <p className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4" /> Moi Avenue, Nairobi, Kenya — pickup available after phone confirmation.</p>
         <ContactForm />
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <p className="text-sm font-extrabold text-slate-900">What happens next?</p>
+          <ol className="mt-2 space-y-1.5 text-sm">
+            {steps.map(([n, t]) => (
+              <li key={n} className="flex gap-2.5"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink-950 text-[11px] font-extrabold text-white">{n}</span>{t}</li>
+            ))}
+          </ol>
+        </div>
+        <p className="text-sm">Checking an order? <Link href="/track-order" className="font-bold text-brand-700 hover:underline">Track it live →</Link> <span className="text-slate-400">•</span> Quick answers: <Link href="/faqs" className="font-bold text-brand-700 hover:underline">FAQs →</Link> <span className="text-slate-400">•</span> Cover question: <Link href="/warranty" className="font-bold text-brand-700 hover:underline">Warranty →</Link></p>
       </Shell>
     </>
   );
 }
 
 export function AboutPage() {
+  const stats: [string, string][] = [
+    ["12,400+", "Verified buyer reviews"],
+    ["4.9 / 5", "Average store rating"],
+    ["12-month", "Warranty on new devices"],
+    ["7-day", "Dead-on-arrival cover"],
+  ];
+  const values = [
+    { Icon: BadgeCheck, t: "Sealed & verifiable", d: "Brand-new stock arrives sealed with checkable serials. What we list is exactly what arrives." },
+    { Icon: ShieldCheck, t: "Graded honestly", d: "Pre-owned devices are tested, graded and labelled — battery health disclosed before you pay, never after." },
+    { Icon: Tag, t: "Honest Kenyan prices", d: "We price-check against the local market daily. No inflated 'was' prices, no haggling theatre." },
+    { Icon: Truck, t: "Delivery that shows up", d: "Same-day dispatch in Nairobi, tracked couriers upcountry, and a phone call before any parcel moves." },
+    { Icon: Phone, t: "Humans who know devices", d: "WhatsApp, call or email — you talk to specialists who sell and support this tech every day." },
+    { Icon: RotateCcw, t: "After-sales that answers", d: "Warranty claims and returns handled in the open, with receipts, timelines and follow-through." },
+  ];
   return (
     <>
       <PageHero
@@ -93,16 +121,59 @@ export function AboutPage() {
         image="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="About" />
-      <Shell>
-        <p><strong className="text-slate-900">PhoneLaptops.co.ke</strong> exists for one reason: to make buying genuine tech in Kenya simple, fairly priced and stress-free.</p>
-        <p>We stock the latest laptops, iPhones, smartphones, tablets and accessories — every unit sourced from trusted suppliers, clearly graded (Brand New vs Pre-Owned), covered by warranty and delivered across Kenya.</p>
-        <p><strong className="text-slate-900">Latest Tech. Honest Prices. Delivered.</strong> That is the promise on every order: authentic products, M-Pesa convenience, WhatsApp support from people who know devices, and after-sales help if anything goes wrong.</p>
-      </Shell>
+      <div className="container-x max-w-3xl py-10 md:py-14">
+        <div className="card space-y-4 p-6 text-[15px] leading-relaxed text-slate-600 md:p-8">
+          <p><strong className="text-slate-900">PhoneLaptops.co.ke</strong> exists for one reason: to make buying genuine tech in Kenya simple, fairly priced and stress-free.</p>
+          <p>We stock the latest laptops, iPhones, smartphones, tablets and accessories — every unit sourced from trusted suppliers, clearly graded (Brand New vs Pre-Owned), covered by warranty and delivered across Kenya.</p>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            {stats.map(([v, l]) => (
+              <div key={l} className="rounded-2xl bg-slate-50 p-4 text-center">
+                <p className="font-display text-xl font-extrabold text-slate-900">{v}</p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <h2 className="section-title mt-10">How we earn your trust</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {values.map(({ Icon, t, d }) => (
+            <div key={t} className="card p-5">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
+                <Icon className="h-5 w-5" />
+              </span>
+              <p className="mt-3 font-bold text-slate-900">{t}</p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-500">{d}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="card mt-6 bg-ink-950 !border-ink-950 p-6 text-white md:p-8">
+          <p className="font-display text-xl font-extrabold">Latest Tech. Honest Prices. Delivered.</p>
+          <p className="mt-1 text-sm text-slate-300">That is the promise on every order. Come see it in action:</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/deals" className="btn-primary !bg-accent !text-ink-950 hover:!bg-white">Shop today&apos;s deals</Link>
+            <Link href="/guides" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Read buying guides</Link>
+            <Link href="/contact" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Talk to us</Link>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
 
 export function WarrantyPage() {
+  const cover: [string, string][] = [
+    ["Brand-new devices", "12 months — full cover, parts and labour."],
+    ["Certified pre-owned iPhones", "6 months — battery health 89%+ stated in writing."],
+    ["Accessories", "6–18 months as listed on the product page."],
+    ["Parts & upgrades", "6 months — fit confirmed free before you pay."],
+  ];
+  const steps: [string, string][] = [
+    ["Message us", "WhatsApp 0715 135 141 with your order number, the product and what is wrong — photos or a short video speed things up."],
+    ["We verify", "We confirm your order and cover, and diagnose remotely where possible (settings checks, battery reports, serial lookup)."],
+    ["We resolve", "Repair, replacement or refund per the terms below — most claims concluded within a week of verification."],
+  ];
   return (
     <>
       <PageHero
@@ -114,15 +185,79 @@ export function WarrantyPage() {
       />
       <Crumb current="Warranty" />
       <Shell>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><ShieldCheck className="h-5 w-5 text-emerald-600" /> Clear warranty on every product</p>
-        <ul className="list-disc space-y-1.5 pl-5">
-          <li>Brand-new devices: 12-month warranty unless stated otherwise on the product page.</li>
-          <li>Certified pre-owned iPhones: 6-month shop warranty, battery health 89%+.</li>
-          <li>Accessories: 6–18 months as listed per product.</li>
-        </ul>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><RotateCcw className="h-5 w-5 text-brand-600" /> 7-day DOA cover</p>
-        <p>Dead on arrival? Contact us within 7 days with photos/video and we will replace or refund after verification. Items must be returned with all accessories and packaging.</p>
-        <p className="text-sm text-slate-500">To claim: WhatsApp 0715 135 141 with your order number, product and a description of the issue. Keep your receipt.</p>
+        <p className="flex items-center gap-2 font-bold text-slate-900"><ShieldCheck className="h-5 w-5 text-emerald-600" /> What is covered</p>
+        <div className="overflow-hidden rounded-xl border border-slate-100 text-sm">
+          {cover.map(([k, v]) => (
+            <div key={k} className="grid gap-1 border-t border-slate-100 p-3 first:border-0 sm:grid-cols-[220px_1fr]">
+              <p className="font-bold text-slate-900">{k}</p>
+              <p>{v}</p>
+            </div>
+          ))}
+        </div>
+        <p className="flex items-center gap-2 font-bold text-slate-900"><RotateCcw className="h-5 w-5 text-brand-600" /> 7-day dead-on-arrival cover</p>
+        <p>Arrived faulty? Contact us within 7 days of delivery with photos or video and we replace or refund after verification. Items must come back complete — device, accessories and packaging.</p>
+        <p className="font-bold text-slate-900">How to claim — three steps</p>
+        <ol className="space-y-2.5">
+          {steps.map(([t, d], i) => (
+            <li key={t} className="flex gap-3">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
+              <span><strong className="text-slate-900">{t}.</strong> {d}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="text-sm text-slate-500">Not covered: physical or liquid damage, unauthorised repairs or modifications, normal battery wear beyond the stated health, and lost accessories. Keep your receipt — it is your warranty document.</p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`https://wa.me/254715135141?text=${encodeURIComponent("Hello PhoneLaptops! I'd like to start a warranty claim. My order number is: ")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-whatsapp"
+          >
+            <WhatsAppIcon className="mx-auto h-4 w-4" /> Start a claim
+          </a>
+          <Link href="/returns" className="btn-ghost">Returns policy →</Link>
+        </div>
+      </Shell>
+    </>
+  );
+}
+
+export function ReturnsPage() {
+  const steps: [string, string][] = [
+    ["Tell us fast", "WhatsApp 0715 135 141 within 7 days of delivery with your order number and clear photos or video of the issue."],
+    ["We verify", "We confirm the fault against the DOA and warranty terms — usually the same day."],
+    ["Send it back", "Nairobi: drop-off or rider pickup. Upcountry: courier the item complete with accessories and packaging."],
+    ["Get sorted", "Replacement ships first where stock allows — otherwise an M-Pesa refund within 3 business days of inspection."],
+  ];
+  return (
+    <>
+      <PageHero
+        eyebrow="No-drama returns"
+        heading="Returns Policy"
+        blurb="Changed your mind or received a fault? Simple documented steps to a replacement or refund — no interrogation."
+        badges={["✓ 7-Day DOA Cover", "✓ Verified Claims", "✓ M-Pesa Refunds"]}
+        image="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1600&q=80"
+      />
+      <Crumb current="Returns" />
+      <Shell>
+        <p className="flex items-center gap-2 font-bold text-slate-900"><Undo2 className="h-5 w-5 text-brand-600" /> Faulty on arrival (7 days)</p>
+        <p>Dead, damaged or materially not as described? We replace or refund in full after verification — return courier on us within Nairobi for confirmed faults.</p>
+        <p className="flex items-center gap-2 font-bold text-slate-900"><FileCheck className="h-5 w-5 text-brand-600" /> Change of mind (7 days)</p>
+        <p>Sealed, unused items in original packaging qualify for replacement or refund within 7 days with your receipt. Opened accessories and fitted parts are handled case-by-case — ask us first and we will be straight with you. Delivery fees are refundable only where the error was ours.</p>
+        <p className="font-bold text-slate-900">The process</p>
+        <ol className="space-y-2.5">
+          {steps.map(([t, d], i) => (
+            <li key={t} className="flex gap-3">
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
+              <span><strong className="text-slate-900">{t}.</strong> {d}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="text-sm text-slate-500">Everything must come back complete — device, chargers, manuals and box. Refunds go to the M-Pesa number on the order unless you ask otherwise.</p>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/contact" className="btn-primary w-fit">Contact us</Link>
+          <Link href="/warranty" className="btn-ghost">Warranty terms →</Link>
+        </div>
       </Shell>
     </>
   );
@@ -181,17 +316,55 @@ const LEGAL_HERO: Record<"privacy" | "terms" | "returns", { heading: string; blu
   },
 };
 
+function PolicySection({ h, children }: { h: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="font-bold text-slate-900">{h}</h2>
+      <div className="mt-1 space-y-2 text-slate-600">{children}</div>
+    </section>
+  );
+}
+
+const PRIVACY_SECTIONS: { h: string; body: string[] }[] = [
+  { h: "1. Data we collect", body: ["Contact details you give us: name, phone number, email address and delivery address.", "Order details: what you bought, what you paid and how (M-Pesa, card or pay on delivery).", "Support messages: WhatsApp chats, emails and call notes so we can follow through.", "Technical basics: device type and pages visited, used only to keep the site fast and working."] },
+  { h: "2. How we use it", body: ["To fulfil and deliver your order — including courier booking and delivery confirmation calls.", "To support you: warranty claims, returns, repairs and product advice.", "To send deal alerts, but only where you opted in (newsletter, popup or WhatsApp list).", "To prevent fraud and abuse of checkout, promos and reviews."] },
+  { h: "3. Payments", body: ["M-Pesa and card payments run over encrypted connections through licensed processors.", "We never see or store your M-Pesa PIN or card numbers — only the payment confirmation tied to your order."] },
+  { h: "4. Cookies & analytics", body: ["We use strictly-necessary storage (cart, wishlist, preferences) plus basic traffic measurement to improve the shop.", "No advertising trackers, no cross-site profiling, no data brokering — ever."] },
+  { h: "5. Who we share with", body: ["Delivery couriers (name, phone, town) so your parcel reaches you.", "Payment processors (transaction references) so your payment confirms.", "Nobody else. We do not sell, rent or trade personal data, full stop."] },
+  { h: "6. How long we keep it", body: ["Order and receipt records are kept for warranty and tax purposes, then minimised.", "Deal-alert subscriptions last until you opt out — every message includes an opt-out path."] },
+  { h: "7. Your rights", body: ["Ask what we hold about you, correct it, or request deletion where the law allows.", "Opt out of marketing any time: reply STOP on WhatsApp or email support@phonelaptops.co.ke.", "We respond to privacy requests within 7 days."] },
+];
+
+const TERMS_SECTIONS: { h: string; body: string[] }[] = [
+  { h: "1. Who we are", body: ["PhoneLaptops.co.ke is a Kenyan technology retailer operating from Moi Avenue, Nairobi. By placing an order you agree to these terms alongside the warranty and returns policies linked on every product page."] },
+  { h: "2. Products & condition", body: ["Every listing carries a condition badge: Brand New (sealed, manufacturer warranty) or Pre-Owned/Refurbished (tested, graded, battery health disclosed).", "Photos, specs and prices are checked for accuracy, but the condition badge and written description prevail where they differ."] },
+  { h: "3. Pricing & orders", body: ["All prices are in Kenyan Shillings. The price confirmed at checkout is final — even if a catalogue price changes afterwards.", "An order is confirmed on successful payment, or on phone confirmation for pay-on-delivery. We may cancel and refund any order we cannot fulfil (pricing error, dead stock)."] },
+  { h: "4. Payment", body: ["M-Pesa STK push (fastest), debit/credit card, or pay on delivery in selected zones.", "Pay-on-delivery orders are confirmed by phone first; repeated missed confirmations may lead to cancellation."] },
+  { h: "5. Delivery", body: ["Nairobi same-day/next-day; major towns 1–2 days; other towns 2–3 days via courier. ETAs are honest estimates, not guarantees.", "Risk passes to you on delivery. Inspect sealed items before the rider leaves where possible and report damage within 48 hours."] },
+  { h: "6. Warranty & returns", body: ["Brand-new devices carry a 12-month warranty; certified pre-owned iPhones 6 months; accessories 6–18 months as listed; parts 6 months.", "Dead-on-arrival items are replaced or refunded within 7 days of delivery after verification.", "Full detail lives on the Warranty and Returns pages — those terms form part of this agreement."] },
+  { h: "7. Fair use", body: ["Fraudulent orders, payment reversals after delivery, review manipulation and promo abuse lead to blacklisting and legal action where applicable."] },
+  { h: "8. Liability", body: ["Our liability is limited to the value of the affected order. We are not liable for indirect losses (lost data, downtime) — back up your devices before service or repair."] },
+  { h: "9. Changes & contact", body: ["We may update these terms; the version at checkout governs your order. Questions: support@phonelaptops.co.ke / +254 715 135 141."] },
+];
+
 export function LegalPage({ kind }: { kind: "privacy" | "terms" | "returns" }) {
   const hero = LEGAL_HERO[kind];
   const crumb = kind === "privacy" ? "Privacy" : kind === "terms" ? "Terms" : "Returns";
+  const sections = kind === "terms" ? TERMS_SECTIONS : PRIVACY_SECTIONS;
+  const updated = "September 2026";
   return (
     <>
       <PageHero eyebrow="Legal" heading={hero.heading} blurb={hero.blurb} badges={hero.badges} image={hero.image} />
       <Crumb current={crumb} />
       <Shell>
-        <p>PhoneLaptops.co.ke (“we”) processes your name, phone, email and delivery address solely to fulfil orders, provide support and (with consent) send deal alerts. We never sell personal data. M-Pesa and card payments are processed over encrypted connections; we do not store PINs or card numbers.</p>
-        <p>Prices are in Kenyan Shillings and may change without notice; the price at checkout is final. Orders are confirmed on payment (or on phone confirmation for pay-on-delivery). Delivery ETAs are estimates. Warranty and 7-day DOA cover apply as listed on each product page.</p>
-        <p>Questions: support@phonelaptops.co.ke / +254 715 135 141.</p>
+        <p className="text-sm text-slate-400">Last updated: {updated}. Questions about this page? <Link href="/contact" className="font-bold text-brand-700 hover:underline">Contact us →</Link></p>
+        {sections.map((s) => (
+          <PolicySection key={s.h} h={s.h}>
+            {s.body.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </PolicySection>
+        ))}
       </Shell>
     </>
   );
