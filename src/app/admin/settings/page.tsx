@@ -186,7 +186,7 @@ export default function AdminSettings() {
         <p className="font-extrabold text-slate-900">Good to know</p>
         <p>Payment keys and hosting configuration are managed securely outside this console.</p>
         <p>Product descriptions support rich text — headings, paragraphs, lists and bold.</p>
-        <p>Image ads are managed under <strong>Ads & Banners</strong>: WIDE for page banners, SQUARE for the product sidebar.</p>
+        <p>Image ads are managed under <strong>Ads & Banners</strong>: WIDE for page banners, SQUARE for product, blog and guide sidebars.</p>
       </div>
     </div>
   );

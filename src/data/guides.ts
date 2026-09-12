@@ -2,6 +2,7 @@ export interface Guide {
   slug: string;
   title: string;
   description: string;
+  cover?: string;
   updated: string;
   readMins: number;
   keywords: string[];
@@ -17,6 +18,7 @@ export const GUIDES: Guide[] = [
     title: "How to Choose a Laptop in Kenya (2026 Buying Guide)",
     description:
       "Student, business or gaming? Core i5 vs i7, 8GB vs 16GB RAM, SSD sizes and honest Kenyan price bands — plus which laptops we recommend at every budget.",
+    cover: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
     updated: "September 2026",
     readMins: 8,
     keywords: ["laptops in Kenya", "buy laptops Kenya", "cheap laptops Kenya", "laptop prices Kenya"],
@@ -53,6 +55,7 @@ export const GUIDES: Guide[] = [
     title: "Buying an iPhone in Kenya: New vs Pre-Owned (2026 Guide)",
     description:
       "Sealed vs certified pre-owned, which storage size, battery health red flags and honest iPhone prices in Kenya — everything to check before you pay.",
+    cover: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80",
     updated: "September 2026",
     readMins: 6,
     keywords: ["iPhones Kenya", "iPhone prices Kenya", "pre-owned iPhone Kenya"],

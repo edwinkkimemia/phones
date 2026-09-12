@@ -4,8 +4,8 @@ Where ads appear and the exact sizes users see. Create creatives to these dimens
 
 ## WIDE banners
 
-Shown above the breadcrumb on product + category pages, and between homepage
-sections (`below-hero`, `below-deals`, `above-footer`).
+Shown above the breadcrumb on product + category + blog + guide pages,
+and between homepage sections (`below-hero`, `below-deals`, `above-footer`).
 
 | Device  | Displayed size   |
 | ------- | ---------------- |
@@ -16,7 +16,8 @@ sections (`below-hero`, `below-deals`, `above-footer`).
 
 ## SQUARE ads
 
-Shown in the product-page sidebar below “Still deciding?” (two stacked).
+Shown in sidebars (two stacked): below “Still deciding?” on product pages,
+and in the sidebar on blog articles and buying guides.
 
 | Device  | Displayed size   |
 | ------- | ---------------- |
@@ -43,10 +44,11 @@ Shown in the product-page sidebar below “Still deciding?” (two stacked).
 
 /admin → **Ads & Banners** → **New ad**:
 
-- **Shows on** — GLOBAL (everywhere), HOMEPAGE (section), CATEGORY, PRODUCT or BLOG.
+- **Shows on** — GLOBAL (everywhere), HOMEPAGE (section), CATEGORY, PRODUCT, BLOG or GUIDES.
 - **Target** — `below-hero` / `below-deals` / `above-footer` for homepage,
   a category slug (e.g. `laptops`), product slug, blog slug (or `blog` for the
-  index) — or `all`. Suggestions appear as you type; matching ignores case.
+  index), guide slug (or `guides` for the index) — or `all`. Suggestions appear
+  as you type; matching ignores case.
 - **Inheritance** — products automatically show their parent category's banners
   (wide above the breadcrumb, square in the sidebar) unless a product-specific
   ad outranks them. Priority order: exact product → category → global.

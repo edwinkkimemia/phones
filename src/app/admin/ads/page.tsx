@@ -57,6 +57,7 @@ function AdRow({ a, cats, reload }: { a: Ad; cats: { slug: string; name: string 
             <option value="CATEGORY">CATEGORY</option>
             <option value="PRODUCT">PRODUCT</option>
             <option value="BLOG">BLOG</option>
+            <option value="GUIDES">GUIDES</option>
           </select>
         </label>
         <label className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Target
@@ -125,6 +126,7 @@ function SlotTester() {
           <option value="CATEGORY">CATEGORY</option>
           <option value="PRODUCT">PRODUCT</option>
           <option value="BLOG">BLOG</option>
+          <option value="GUIDES">GUIDES</option>
         </select>
         <AdTargetInput placement={placement} value={target} onChange={setTarget} className="input !py-2 text-xs font-bold" />
         {placement === "PRODUCT" && (
@@ -194,7 +196,7 @@ export default function AdminAds() {
         <div>
           <h1 className="section-title !text-2xl">Ads & Banners</h1>
           <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
-            WIDE banners appear above breadcrumbs and between homepage sections; SQUARE ads appear below “Still deciding?” on product pages.
+            WIDE banners appear above breadcrumbs and between homepage sections; SQUARE ads appear in product, blog and guide sidebars.
             Pick <strong>shows on</strong>, then choose the exact target from suggestions — exact matches always win, <strong>priority</strong> breaks ties.
           </p>
         </div>
@@ -210,6 +212,7 @@ export default function AdminAds() {
           [
             { title: "Homepage", desc: "Between homepage sections (below-hero, below-deals, above-footer).", match: (a: Ad) => a.placement === "HOMEPAGE" },
             { title: "Blog", desc: "Above the breadcrumb on the blog index and article pages, plus article sidebars.", match: (a: Ad) => a.placement === "BLOG" },
+            { title: "Guides", desc: "Above the breadcrumb on the guides index and guide pages, plus guide sidebars.", match: (a: Ad) => a.placement === "GUIDES" },
             { title: "Category banners", desc: "Wide banners above the breadcrumb on category pages — inherited by their products.", match: (a: Ad) => a.placement === "CATEGORY" && (a.format ?? "WIDE") === "WIDE" },
             { title: "Product sidebar", desc: "Square ads below “Still deciding?” on product pages.", match: (a: Ad) => (a.format ?? "WIDE") === "SQUARE" },
             { title: "Product-specific", desc: "Wide banners pinned to one product page.", match: (a: Ad) => a.placement === "PRODUCT" && (a.format ?? "WIDE") === "WIDE" },

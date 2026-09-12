@@ -9,7 +9,7 @@ interface DefaultAd {
   title: string;
   image: string;
   link: string;
-  placement: "GLOBAL" | "HOMEPAGE" | "CATEGORY" | "PRODUCT";
+  placement: "GLOBAL" | "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG" | "GUIDES";
   target: string;
   format: "WIDE" | "SQUARE";
   sortOrder: number;
@@ -95,6 +95,66 @@ export const DEMO_ADS: DefaultAd[] = [
     target: "above-footer",
     format: "WIDE",
     sortOrder: 0,
+  },
+  {
+    id: "demo-blog-all-BLOG-WIDE",
+    title: "Tech advice that saves you money — read the blog",
+    image: img("photo-1496181133206-80ce9b88a853"),
+    link: "/blog",
+    placement: "BLOG",
+    target: "all",
+    format: "WIDE",
+    sortOrder: 0,
+  },
+  {
+    id: "demo-guides-all-GUIDES-WIDE",
+    title: "Buying guides for Kenya — choose with confidence",
+    image: img("photo-1518770660439-4636190af475"),
+    link: "/guides",
+    placement: "GUIDES",
+    target: "all",
+    format: "WIDE",
+    sortOrder: 0,
+  },
+  {
+    id: "demo-blog-all-BLOG-SQUARE",
+    title: "Today's Tech Deals — save up to 20%",
+    image: img("photo-1607083206869-4c7672e72a8a", 800),
+    link: "/deals",
+    placement: "BLOG",
+    target: "all",
+    format: "SQUARE",
+    sortOrder: 0,
+  },
+  {
+    id: "demo-blog-all-BLOG-SQUARE-2",
+    title: "Complete your setup — accessories from KES 2,499",
+    image: img("photo-1572569511254-d8f925fe2cbb", 800),
+    link: "/accessories",
+    placement: "BLOG",
+    target: "all",
+    format: "SQUARE",
+    sortOrder: 1,
+  },
+  {
+    id: "demo-guides-all-GUIDES-SQUARE",
+    title: "Laptop deals from KES 42,999",
+    image: img("photo-1496181133206-80ce9b88a853", 800),
+    link: "/laptops",
+    placement: "GUIDES",
+    target: "all",
+    format: "SQUARE",
+    sortOrder: 0,
+  },
+  {
+    id: "demo-guides-all-GUIDES-SQUARE-2",
+    title: "M-Pesa deals — pay on delivery available",
+    image: img("photo-1556742049-0cfed4f6a45d", 800),
+    link: "/deals",
+    placement: "GUIDES",
+    target: "all",
+    format: "SQUARE",
+    sortOrder: 1,
   },
 ];
 

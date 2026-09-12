@@ -5,7 +5,8 @@ import { PRODUCTS } from "@/data/catalog";
 export const HOMEPAGE_SLOTS = ["below-hero", "below-deals", "above-footer"];
 
 // Target input with autocomplete suggestions so admins can only pick
-// valid slugs: live categories, product slugs, blog posts, homepage slots, or "all".
+// valid slugs: live categories, product slugs, blog posts, guides,
+// homepage slots, or "all".
 export default function AdTargetInput({
   placement,
   value,
@@ -19,6 +20,7 @@ export default function AdTargetInput({
 }) {
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const [posts, setPosts] = useState<{ slug: string; title: string }[]>([]);
+  const [guides, setGuides] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -29,6 +31,12 @@ export default function AdTargetInput({
       fetch("/api/blog")
         .then((r) => r.json())
         .then((d) => setPosts((d.posts ?? []).map((p: { slug: string; title: string }) => ({ slug: p.slug, title: p.title }))))
+        .catch(() => null);
+    }
+    if (placement === "GUIDES") {
+      fetch("/api/guides")
+        .then((r) => r.json())
+        .then((d) => setGuides((d.guides ?? []).map((g: { slug: string; title: string }) => ({ slug: g.slug, title: g.title }))))
         .catch(() => null);
     }
   }, [placement]);
@@ -55,6 +63,12 @@ export default function AdTargetInput({
           <>
             <option value="blog">blog (index page)</option>
             {posts.map((p) => <option key={p.slug} value={p.slug}>{p.title}</option>)}
+          </>
+        )}
+        {placement === "GUIDES" && (
+          <>
+            <option value="guides">guides (index page)</option>
+            {guides.map((g) => <option key={g.slug} value={g.slug}>{g.title}</option>)}
           </>
         )}
       </datalist>

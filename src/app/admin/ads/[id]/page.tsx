@@ -8,7 +8,7 @@ import AdTargetInput from "@/components/AdTargetInput";
 
 interface Ad {
   id: string; title: string; image: string; link: string;
-  placement: "GLOBAL" | "HOMEPAGE" | "CATEGORY" | "PRODUCT"; target: string;
+  placement: "GLOBAL" | "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG" | "GUIDES"; target: string;
   format: "WIDE" | "SQUARE"; sortOrder: number; active: boolean;
   startsAt?: string | null; endsAt?: string | null;
 }
@@ -91,6 +91,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
                 <option value="CATEGORY">CATEGORY page</option>
                 <option value="PRODUCT">PRODUCT page</option>
                 <option value="BLOG">BLOG page</option>
+                <option value="GUIDES">GUIDES page</option>
               </select>
             </div>
             <div><label className="label">Format</label>

@@ -308,6 +308,7 @@ enum AdPlacement {
   CATEGORY
   PRODUCT
   BLOG
+  GUIDES
 }
 
 enum AdFormat {
@@ -337,6 +338,27 @@ model BlogPost {
   views          Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+// Buying guides: evergreen Kenyan purchase advice, managed from /admin → Guides.
+// Static entries in src/data/guides.ts seed this table and remain the fallback.
+model Guide {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String   @db.Text
+  cover        String?
+  intro        String   @db.Text
+  sections     Json     @default("[]")
+  relatedSlugs String[] @default([])
+  faqs         Json     @default("[]")
+  keywords     String[] @default([])
+  readMins     Int      @default(5)
+  updated      String   @default("")
+  published    Boolean  @default(false)
+  views        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 // Email marketing list (footer/newsletter form + discount popup).

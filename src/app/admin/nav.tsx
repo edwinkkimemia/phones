@@ -16,6 +16,7 @@ import {
   LogOut,
   Send,
   Newspaper,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,7 @@ export const ADMIN_LINKS = [
   { href: "/admin/ads", label: "Ads & Banners", Icon: Megaphone },
   { href: "/admin/reviews", label: "Reviews", Icon: Star },
   { href: "/admin/blog", label: "Blog", Icon: Newspaper },
+  { href: "/admin/guides", label: "Guides", Icon: BookOpen },
   { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
   { href: "/admin/settings", label: "Settings", Icon: Settings },
 ];

@@ -49,7 +49,7 @@ export default function NewAdPage() {
       </nav>
       <h1 className="section-title mt-1 !text-2xl">New Ad</h1>
       <p className="mt-1 text-xs text-slate-500">
-        WIDE banners appear above breadcrumbs and between homepage sections; SQUARE ads appear below “Still deciding?” on product pages.
+        WIDE banners appear above breadcrumbs and between homepage sections; SQUARE ads appear in product, blog and guide sidebars.
       </p>
 
       <form onSubmit={submit} className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -65,6 +65,7 @@ export default function NewAdPage() {
                 <option value="CATEGORY">CATEGORY page</option>
                 <option value="PRODUCT">PRODUCT page</option>
                 <option value="BLOG">BLOG page</option>
+                <option value="GUIDES">GUIDES page</option>
               </select>
             </div>
             <div><label className="label">Format</label>

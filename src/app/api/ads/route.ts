@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 
-// GET /api/ads?placement=CATEGORY|PRODUCT|GLOBAL&target=slug&category=cat&format=WIDE|SQUARE&index=0
+// GET /api/ads?placement=CATEGORY|PRODUCT|BLOG|GUIDES|GLOBAL&target=slug&category=cat&format=WIDE|SQUARE&index=0
 // Tiered: exact → wildcard → parent CATEGORY (for product pages) → GLOBAL.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     title: z.string().min(3),
     image: z.string().url(),
     link: z.string().min(1),
-    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG"]),
+    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG", "GUIDES"]),
     target: z.string().min(1),
     format: z.enum(["WIDE", "SQUARE"]).default("WIDE"),
   });
@@ -137,7 +137,7 @@ export async function PATCH(req: Request) {
     title: z.string().min(3).optional(),
     image: z.string().url().optional(),
     link: z.string().min(1).optional(),
-    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG"]).optional(),
+    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG", "GUIDES"]).optional(),
     target: z.string().min(1).optional(),
     format: z.enum(["WIDE", "SQUARE"]).optional(),
     sortOrder: z.number().int().optional(),

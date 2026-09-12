@@ -9,7 +9,7 @@ export interface AdT {
 }
 
 // Full-width (WIDE) image ad above breadcrumbs / between sections,
-// or SQUARE ads for sidebars (product + blog pages).
+// or SQUARE ads for sidebars (product + blog + guide pages).
 // Resolved server-side: exact match wins, then parent category, then global.
 // Falls back client-side to the admin's GLOBAL ads so a slot never stays
 // empty when a global fallback exists.
@@ -23,7 +23,7 @@ export default function AdSlot({
   bare = false,
   className,
 }: {
-  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG" | "GLOBAL";
+  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG" | "GUIDES" | "GLOBAL";
   target?: string;
   category?: string;
   format?: "WIDE" | "SQUARE";

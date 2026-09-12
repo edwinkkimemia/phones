@@ -3,7 +3,6 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChevronRight, Clock } from "lucide-react";
-import { GUIDES, getGuide } from "@/data/guides";
 import { getProduct } from "@/data/catalog";
 import ProductCard from "@/components/ProductCard";
 import ShareButtons from "@/components/ShareButtons";
@@ -11,33 +10,42 @@ import AdSlot from "@/components/AdSlot";
 import { WhatsAppIcon } from "@/components/icons";
 import { faqJsonLd } from "@/lib/seo";
 import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
+import { getPublishedGuide, getPublishedGuides } from "@/lib/guides";
 
-export function generateStaticParams() {
-  return GUIDES.map((g) => ({ slug: g.slug }));
+export async function generateStaticParams() {
+  const guides = await getPublishedGuides();
+  return guides.map((g) => ({ slug: g.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const g = getGuide(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const g = await getPublishedGuide(params.slug);
   if (!g) return {};
   return {
     title: g.title,
     description: g.description,
     keywords: g.keywords,
     alternates: { canonical: `https://phonelaptops.co.ke/guides/${g.slug}` },
-    openGraph: { title: g.title, description: g.description, type: "article" },
+    openGraph: {
+      title: g.title,
+      description: g.description,
+      type: "article",
+      ...(g.cover ? { images: [{ url: g.cover, alt: g.title }] } : {}),
+    },
   };
 }
 
-export default function GuidePage({ params }: { params: { slug: string } }) {
-  const g = getGuide(params.slug);
+export default async function GuidePage({ params }: { params: { slug: string } }) {
+  const g = await getPublishedGuide(params.slug);
   if (!g) notFound();
   const related = g.relatedSlugs.map(getProduct).filter(Boolean);
-  const moreGuides = GUIDES.filter((x) => x.slug !== g.slug).slice(0, 4);
+  const all = await getPublishedGuides();
+  const moreGuides = all.filter((x) => x.slug !== g.slug).slice(0, 4);
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: g.title,
     description: g.description,
+    ...(g.cover ? { image: g.cover } : {}),
     dateModified: g.updated,
     author: { "@type": "Organization", name: "PhoneLaptops.co.ke", url: "https://phonelaptops.co.ke" },
     publisher: {
@@ -59,7 +67,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
         <ChevronRight className="h-3 w-3" />
         <span className="truncate font-semibold text-slate-800">{g.title}</span>
       </nav>
-      <AdSlot placement="BLOG" target={g.slug} bare />
+      <AdSlot placement="GUIDES" target={g.slug} bare />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <article className="min-w-0">
@@ -70,6 +78,13 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
             <span>Updated {g.updated}</span>
             <span>By PhoneLaptops experts</span>
           </p>
+
+          {g.cover && (
+            <div className="relative mt-6 aspect-[16/9] overflow-hidden rounded-3xl">
+              <Image src={g.cover} alt={g.title} fill sizes="800px" className="object-cover" priority />
+            </div>
+          )}
+
           <p className="richtext mt-5 !text-base">{g.intro}</p>
 
           {g.sections.map((s) => (
@@ -138,8 +153,8 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           <div>
             <p className="label">Sponsored</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <AdSlot placement="BLOG" target={g.slug} format="SQUARE" />
-              <AdSlot placement="BLOG" target={g.slug} format="SQUARE" index={1} />
+              <AdSlot placement="GUIDES" target={g.slug} format="SQUARE" />
+              <AdSlot placement="GUIDES" target={g.slug} format="SQUARE" index={1} />
             </div>
           </div>
 

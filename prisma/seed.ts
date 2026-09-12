@@ -272,6 +272,30 @@ async function main() {
   }
   console.log(`Seeded ${BLOG_POSTS.length} blog posts.`);
 
+  // Buying guides (update:{} — editors own them after first seed).
+  const { GUIDES } = await import("../src/data/guides");
+  for (const g of GUIDES) {
+    await prisma.guide.upsert({
+      where: { slug: g.slug },
+      update: {},
+      create: {
+        slug: g.slug,
+        title: g.title,
+        description: g.description,
+        cover: g.cover ?? null,
+        intro: g.intro,
+        sections: g.sections as never,
+        relatedSlugs: g.relatedSlugs,
+        faqs: g.faqs as never,
+        keywords: g.keywords,
+        readMins: g.readMins,
+        updated: g.updated,
+        published: true,
+      },
+    }).catch(() => null);
+  }
+  console.log(`Seeded ${GUIDES.length} guides.`);
+
   // Single source of truth top-up: guarantees every default ad exists with a
   // distinct id (older inline blocks reused one id for two squares).
   // update:{} — never overwrites admin edits.
