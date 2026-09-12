@@ -8,6 +8,7 @@ import PromoPopup from "@/components/PromoPopup";
 import AiAssistant from "@/components/AiAssistant";
 import StoreProviders from "@/components/Providers";
 import { getSiteSettings } from "@/lib/site-settings";
+import { getCategories } from "@/lib/catalog-server";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://phonelaptops.co.ke"),
@@ -56,6 +57,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
+  const categories = await getCategories();
+  const navCats = categories.map((c) => ({ slug: c.slug, name: c.name }));
   return (
     <html lang="en-KE">
       <head>
@@ -71,9 +74,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             phone={settings.phone_display}
             email={settings.email}
             announcement={settings.announcement}
+            categories={navCats}
           />
           <main className="min-h-[60vh]">{children}</main>
-          <Footer settings={settings} />
+          <Footer settings={settings} categories={navCats} />
           <WhatsAppFloat phone={settings.whatsapp_number} />
           <MobileNav />
           <AiAssistant />

@@ -6,6 +6,10 @@ import { ChevronRight } from "lucide-react";
 import ShopClient from "@/components/ShopClient";
 import AdSlot from "@/components/AdSlot";
 import { PRODUCTS, CATEGORIES } from "@/data/catalog";
+import type { ProductT } from "@/types";
+import { getLiveCategory } from "@/lib/catalog-server";
+
+export const dynamicParams = true;
 
 interface CatMeta {
   title: string;
@@ -96,19 +100,32 @@ export function generateStaticParams() {
   return Object.keys(TITLES).map((category) => ({ category }));
 }
 
-export function generateMetadata({ params }: { params: { category: string } }): Metadata {
+export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
   const t = TITLES[params.category];
-  if (!t) return {};
+  if (t) {
+    return {
+      title: `${t.title} — Best Prices in Kenya`,
+      description: t.desc,
+      alternates: { canonical: `https://phonelaptops.co.ke/${params.category}` },
+    };
+  }
+  const live = await getLiveCategory(params.category);
+  if (!live) return {};
   return {
-    title: `${t.title} — Best Prices in Kenya`,
-    description: t.desc,
+    title: `${live.meta.title} — Best Prices in Kenya`,
+    description: live.meta.desc,
     alternates: { canonical: `https://phonelaptops.co.ke/${params.category}` },
   };
 }
 
-export default function CategoryPage({ params }: { params: { category: string } }) {
+export default async function CategoryPage({ params }: { params: { category: string } }) {
   const meta = TITLES[params.category];
-  if (!meta) notFound();
+  if (!meta) {
+    // Admin-created slug? Resolve live from the database.
+    const live = await getLiveCategory(params.category);
+    if (!live) notFound();
+    return <LiveCategoryPage slug={params.category} meta={live.meta} hero={live.hero} image={live.image} items={live.items} />;
+  }
 
   let items = PRODUCTS;
   if (params.category === "deals") items = PRODUCTS.filter((p) => p.isDeal);
@@ -133,39 +150,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
 
   return (
     <>
-      <div className="relative overflow-hidden bg-ink-950 text-white">
-        {heroImage && (
-          <Image
-            src={heroImage}
-            alt=""
-            aria-hidden="true"
-            fill
-            priority
-            className="object-cover opacity-45"
-          />
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/65 to-ink-950/25" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/70 via-transparent to-ink-950/20" />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(600px 260px at 12% 20%, rgba(43,107,255,.35), transparent), radial-gradient(500px 240px at 88% 30%, rgba(0,213,255,.16), transparent)",
-          }}
-        />
-        <div className="container-x relative py-10 md:py-14">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">{meta.hero.eyebrow}</p>
-          <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{meta.hero.heading}</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-200">
-            {meta.hero.blurb}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
-            {meta.hero.badges.map((b) => (
-              <span key={b} className="rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-sm">{b}</span>
-            ))}
-          </div>
-        </div>
-      </div>
+      <CategoryHero hero={meta.hero} image={heroImage} />
       <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
         <Link href="/" className="hover:text-brand-700">Home</Link>
         <ChevronRight className="h-3 w-3" />
@@ -173,6 +158,71 @@ export default function CategoryPage({ params }: { params: { category: string } 
       </nav>
       <AdSlot placement="CATEGORY" target={params.category} />
       <ShopClient products={items} filters={{ brands, maxPrice }} title={cat?.name ? `${cat.name} — ${meta.title}` : meta.title} subtitle={meta.subtitle} />
+    </>
+  );
+}
+
+function CategoryHero({
+  hero,
+  image,
+}: {
+  hero: { eyebrow: string; heading: string; blurb: string; badges: [string, string, string] };
+  image?: string;
+}) {
+  return (
+    <div className="relative overflow-hidden bg-ink-950 text-white">
+      {image && (
+        <Image src={image} alt="" aria-hidden="true" fill priority className="object-cover opacity-45" />
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/65 to-ink-950/25" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/70 via-transparent to-ink-950/20" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(600px 260px at 12% 20%, rgba(43,107,255,.35), transparent), radial-gradient(500px 240px at 88% 30%, rgba(0,213,255,.16), transparent)",
+        }}
+      />
+      <div className="container-x relative py-10 md:py-14">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">{hero.eyebrow}</p>
+        <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{hero.heading}</h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-200">{hero.blurb}</p>
+        <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+          {hero.badges.map((b) => (
+            <span key={b} className="rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-sm">{b}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Admin-created category slug: same layout, live data.
+function LiveCategoryPage({
+  slug,
+  meta,
+  hero,
+  image,
+  items,
+}: {
+  slug: string;
+  meta: { title: string; subtitle: string; desc: string };
+  hero: { eyebrow: string; heading: string; blurb: string; badges: [string, string, string] };
+  image?: string;
+  items: ProductT[];
+}) {
+  const brands = [...new Set(items.map((p) => p.brand))];
+  const maxPrice = items.length > 0 ? Math.max(...items.map((p) => p.price)) : 50000;
+  return (
+    <>
+      <CategoryHero hero={hero} image={image} />
+      <nav className="container-x flex items-center gap-1.5 pt-5 text-xs text-slate-500" aria-label="Breadcrumb">
+        <Link href="/" className="hover:text-brand-700">Home</Link>
+        <ChevronRight className="h-3 w-3" />
+        <span className="truncate font-semibold text-slate-800">{meta.title}</span>
+      </nav>
+      <AdSlot placement="CATEGORY" target={slug} />
+      <ShopClient products={items} filters={{ brands, maxPrice }} title={meta.title} subtitle={meta.subtitle} />
     </>
   );
 }

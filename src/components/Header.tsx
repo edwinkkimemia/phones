@@ -14,6 +14,7 @@ import {
   Phone,
   Mail,
   GitCompareArrows,
+  ChevronDown,
 } from "lucide-react";
 import { useCart, useWishlist, useCompare } from "@/lib/store";
 import { useSession } from "next-auth/react";
@@ -39,10 +40,12 @@ export default function Header({
   phone = STORE_PHONE_DISPLAY,
   email = "support@phonelaptops.co.ke",
   announcement = "FAST DELIVERY • AUTHENTIC PRODUCTS • M-PESA ACCEPTED",
+  categories = [],
 }: {
   phone?: string;
   email?: string;
   announcement?: string;
+  categories?: { slug: string; name: string }[];
 }) {
   const router = useRouter();
   const count = useCart((s) => s.count());
@@ -50,6 +53,9 @@ export default function Header({
   const compareCount = useCompare((s) => s.ids.length);
   const { data: session } = useSession();
   const userInitial = (session?.user?.email ?? "").charAt(0).toUpperCase();
+  // Admin-created categories not already in the main nav.
+  const navHrefs = new Set(NAV.map((n) => n.href));
+  const extraCats = categories.filter((c) => !navHrefs.has(`/${c.slug}`));
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -293,6 +299,20 @@ export default function Header({
                 {n.hot ? `🔥 ${n.label}` : n.label}
               </Link>
             ))}
+            {extraCats.length > 0 && (
+              <div className="group relative">
+                <button className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg bg-brand-50 px-2.5 py-2.5 text-[12px] font-bold text-brand-700 transition hover:bg-brand-100 xl:px-3 xl:text-[13px]">
+                  Shop All <ChevronDown className="h-3.5 w-3.5 transition group-hover:rotate-180" />
+                </button>
+                <div className="invisible absolute right-0 top-full z-50 max-h-80 w-60 translate-y-1 overflow-auto rounded-2xl border border-slate-200 bg-white p-2 opacity-0 shadow-pop transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  {extraCats.map((c) => (
+                    <Link key={c.slug} href={`/${c.slug}`} className="block rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-800 transition hover:bg-slate-50">
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </nav>
       </div>
@@ -314,6 +334,25 @@ export default function Header({
                 {n.hot ? `🔥 ${n.label}` : n.label}
               </Link>
             ))}
+            {extraCats.length > 0 && (
+              <>
+                <p className="px-4 pb-1 pt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  More categories
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {extraCats.map((c) => (
+                    <Link
+                      key={c.slug}
+                      href={`/${c.slug}`}
+                      onClick={() => setOpen(false)}
+                      className="rounded-xl bg-slate-50 px-4 py-2.5 text-sm font-bold text-slate-700"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
             <div className="grid grid-cols-2 gap-2 pt-2">
               <Link href="/account" onClick={() => setOpen(false)} className="btn-ghost !py-2.5 text-xs">
                 <User className="h-4 w-4" /> Account

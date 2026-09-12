@@ -51,13 +51,17 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
   },
 ];
 
-export default function Footer({ settings }: { settings?: Record<string, string> }) {
+export default function Footer({ settings, categories = [] }: { settings?: Record<string, string>; categories?: { slug: string; name: string }[] }) {
   const phone = settings?.phone_display ?? "+254 715 135 141";
   const waDisplay = settings?.whatsapp_display ?? "0715 135 141";
   const waNumber = settings?.whatsapp_number ?? "254715135141";
   const email = settings?.email ?? "support@phonelaptops.co.ke";
   const address = settings?.address ?? "Moi Avenue, Nairobi, Kenya";
   const tagline = settings?.tagline ?? "Latest Gadgets. Better Living.";
+  const shopSlugs = new Set(COLS[0].links.map((l) => l.href));
+  const extraLinks = categories
+    .filter((c) => !shopSlugs.has(`/${c.slug}`))
+    .map((c) => ({ label: c.name, href: `/${c.slug}` }));
   return (
     <footer className="bg-ink-950 text-slate-300">
       <div className="container-x grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -121,6 +125,13 @@ export default function Footer({ settings }: { settings?: Record<string, string>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{c.title}</p>
             <ul className="mt-4 space-y-2.5">
               {c.links.map((l) => (
+                <li key={l.label}>
+                  <Link href={l.href} className="text-sm text-slate-300 transition hover:text-white">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+              {c.title === "Shop" && extraLinks.map((l) => (
                 <li key={l.label}>
                   <Link href={l.href} className="text-sm text-slate-300 transition hover:text-white">
                     {l.label}

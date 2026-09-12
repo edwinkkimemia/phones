@@ -4,7 +4,8 @@ import { ArrowRight, BadgeCheck, Truck, MessageCircle, CreditCard, ShieldCheck, 
 import { WhatsAppIcon } from "@/components/icons";
 import { pickDaily } from "@/lib/rotation";
 import { HeroFeatures, ShuffleGrid } from "@/components/RotatingShowcase";
-import { CATEGORIES, PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
+import { PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
+import { getCategories } from "@/lib/catalog-server";
 import ProductCard from "@/components/ProductCard";
 
 // Curated order for the hero logo ticker (all have files in public/brand).
@@ -108,7 +109,9 @@ export function Hero() {
   );
 }
 
-export function CategoryGrid() {
+export async function CategoryGrid() {
+  // Live categories (admin-created included), static catalog as fallback.
+  const cats = await getCategories();
   return (
     <section className="container-x py-12 md:py-16">
       <div className="flex items-end justify-between">
@@ -121,10 +124,12 @@ export function CategoryGrid() {
         </Link>
       </div>
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {CATEGORIES.map((c) => (
+        {cats.map((c) => (
           <Link key={c.slug} href={`/${c.slug}`} className="card group overflow-hidden transition hover:-translate-y-1 hover:shadow-pop">
-            <div className="relative aspect-[4/3] overflow-hidden">
-              <Image src={c.image} alt={c.name} fill sizes="300px" className="object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+            <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+              {c.image ? (
+                <Image src={c.image} alt={c.name} fill sizes="300px" className="object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+              ) : null}
               <span className="absolute bottom-2 left-2 rounded-lg bg-ink-950/85 px-2 py-1 text-[10px] font-bold text-white backdrop-blur">
                 {c.count}+ items
               </span>
