@@ -5,7 +5,7 @@ import { PRODUCTS } from "@/data/catalog";
 export const HOMEPAGE_SLOTS = ["below-hero", "below-deals", "above-footer"];
 
 // Target input with autocomplete suggestions so admins can only pick
-// valid slugs: live categories, product slugs, homepage slots, or "all".
+// valid slugs: live categories, product slugs, blog posts, homepage slots, or "all".
 export default function AdTargetInput({
   placement,
   value,
@@ -18,13 +18,20 @@ export default function AdTargetInput({
   className?: string;
 }) {
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
+  const [posts, setPosts] = useState<{ slug: string; title: string }[]>([]);
 
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => r.json())
       .then((d) => setCats((d.categories ?? []).map((c: { slug: string; name: string }) => ({ slug: c.slug, name: c.name }))))
       .catch(() => null);
-  }, []);
+    if (placement === "BLOG") {
+      fetch("/api/blog")
+        .then((r) => r.json())
+        .then((d) => setPosts((d.posts ?? []).map((p: { slug: string; title: string }) => ({ slug: p.slug, title: p.title }))))
+        .catch(() => null);
+    }
+  }, [placement]);
 
   const id = `ad-target-${placement}`;
   return (
@@ -44,6 +51,12 @@ export default function AdTargetInput({
           cats.map((c) => <option key={c.slug} value={c.slug}>{c.name} (category page)</option>)}
         {placement === "PRODUCT" &&
           PRODUCTS.slice(0, 60).map((p) => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+        {placement === "BLOG" && (
+          <>
+            <option value="blog">blog (index page)</option>
+            {posts.map((p) => <option key={p.slug} value={p.slug}>{p.title}</option>)}
+          </>
+        )}
       </datalist>
     </>
   );

@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Newspaper, ArrowRight, Clock } from "lucide-react";
+import AdSlot from "@/components/AdSlot";
+import { getPublishedPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Tech Blog Kenya — Deals, Guides & Buying Advice",
@@ -12,22 +14,11 @@ export const metadata: Metadata = {
 
 interface Post {
   id: string; slug: string; title: string; excerpt: string;
-  cover?: string | null; tags: string[]; createdAt: string;
-}
-
-async function getPosts(): Promise<Post[]> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://phonelaptops.co.ke";
-  try {
-    const res = await fetch(`${base}/api/blog`, { next: { revalidate: 3600 } });
-    const data = await res.json();
-    return data.posts ?? [];
-  } catch {
-    return [];
-  }
+  cover?: string | null; tags: string[]; createdAt: Date;
 }
 
 export default async function BlogPage() {
-  const posts = await getPosts();
+  const posts = await getPublishedPosts();
   const [first, ...rest] = posts;
   return (
     <div className="container-x py-8 md:py-12">
@@ -36,6 +27,7 @@ export default async function BlogPage() {
       <p className="mt-2 max-w-2xl text-sm text-slate-500">
         Buying playbooks, deal alerts and repair guides — written by the team that sells and supports this tech daily.
       </p>
+      <AdSlot placement="BLOG" target="blog" bare className="mt-4" />
 
       {posts.length === 0 && (
         <div className="card mt-8 p-10 text-center text-sm text-slate-500">

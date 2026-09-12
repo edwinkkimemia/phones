@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     title: z.string().min(3),
     image: z.string().url(),
     link: z.string().min(1),
-    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT"]),
+    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG"]),
     target: z.string().min(1),
     format: z.enum(["WIDE", "SQUARE"]).default("WIDE"),
   });
@@ -137,7 +137,7 @@ export async function PATCH(req: Request) {
     title: z.string().min(3).optional(),
     image: z.string().url().optional(),
     link: z.string().min(1).optional(),
-    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT"]).optional(),
+    placement: z.enum(["GLOBAL", "HOMEPAGE", "CATEGORY", "PRODUCT", "BLOG"]).optional(),
     target: z.string().min(1).optional(),
     format: z.enum(["WIDE", "SQUARE"]).optional(),
     sortOrder: z.number().int().optional(),

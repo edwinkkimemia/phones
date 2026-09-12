@@ -43,10 +43,10 @@ Shown in the product-page sidebar below “Still deciding?” (two stacked).
 
 /admin → **Ads & Banners** → **New ad**:
 
-- **Shows on** — GLOBAL (everywhere), HOMEPAGE (section), CATEGORY or PRODUCT.
+- **Shows on** — GLOBAL (everywhere), HOMEPAGE (section), CATEGORY, PRODUCT or BLOG.
 - **Target** — `below-hero` / `below-deals` / `above-footer` for homepage,
-  a category slug (e.g. `laptops`) or product slug for the rest, or `all`.
-  Suggestions appear as you type; matching ignores case and spaces.
+  a category slug (e.g. `laptops`), product slug, blog slug (or `blog` for the
+  index) — or `all`. Suggestions appear as you type; matching ignores case.
 - **Inheritance** — products automatically show their parent category's banners
   (wide above the breadcrumb, square in the sidebar) unless a product-specific
   ad outranks them. Priority order: exact product → category → global.

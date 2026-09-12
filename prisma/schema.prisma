@@ -307,6 +307,7 @@ enum AdPlacement {
   HOMEPAGE
   CATEGORY
   PRODUCT
+  BLOG
 }
 
 enum AdFormat {

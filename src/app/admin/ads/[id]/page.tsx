@@ -90,6 +90,7 @@ export default function EditAdPage({ params }: { params: { id: string } }) {
                 <option value="HOMEPAGE">HOMEPAGE section</option>
                 <option value="CATEGORY">CATEGORY page</option>
                 <option value="PRODUCT">PRODUCT page</option>
+                <option value="BLOG">BLOG page</option>
               </select>
             </div>
             <div><label className="label">Format</label>

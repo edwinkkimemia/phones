@@ -8,10 +8,9 @@ export interface AdT {
   link: string;
 }
 
-// Full-width (WIDE) image ad above the breadcrumb / page content,
-// between homepage sections, or SQUARE ads for sidebars
-// (e.g. below "Still deciding?" on the PDP).
-// Resolved server-side: exact PRODUCT/CATEGORY/HOMEPAGE match wins, else GLOBAL.
+// Full-width (WIDE) image ad above breadcrumbs / between sections,
+// or SQUARE ads for sidebars (product + blog pages).
+// Resolved server-side: exact match wins, then parent category, then global.
 // Managed from /admin → Ads & Banners (AdSlot model).
 export default function AdSlot({
   placement,
@@ -22,7 +21,7 @@ export default function AdSlot({
   bare = false,
   className,
 }: {
-  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT";
+  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG";
   target?: string;
   category?: string;
   format?: "WIDE" | "SQUARE";
