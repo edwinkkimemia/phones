@@ -53,7 +53,7 @@ function LoginForm() {
           {busy ? "Signing in…" : "Sign In"}
         </button>
         <p className="text-center text-[11px] text-slate-400">
-          Authorized staff only. Credentials are seeded from <code>ADMIN_EMAIL</code> / <code>ADMIN_PASSWORD</code>.
+          Authorized staff only. Contact the store owner if you need access.
         </p>
       </form>
     </div>

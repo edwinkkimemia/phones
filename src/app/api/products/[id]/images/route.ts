@@ -26,7 +26,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
     return NextResponse.json({ images });
   } catch {
-    return NextResponse.json({ error: "Connect the database to manage images." }, { status: 503 });
+    return NextResponse.json({ error: "Database unavailable — try again." }, { status: 503 });
   }
 }
 

@@ -192,7 +192,7 @@ export async function POST(req: Request) {
   } catch {
     // Static fallback response (database unreachable)
     return NextResponse.json({
-      orderNumber: num, total, demo: true,
+      orderNumber: num, total,
       stk,
       items: lines,
     });

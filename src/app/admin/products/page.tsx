@@ -129,7 +129,7 @@ export default function AdminProducts() {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-[11px] text-slate-400">Tip: click out of a price/stock field to save. Full editing (images, variants, specs, rich description) lives in the product record — extend this table as needed.</p>
+      <p className="mt-2 text-[11px] text-slate-400">Tip: click out of a price or stock field to save. Open any product for full editing — gallery, specs, description and flags.</p>
     </div>
   );
 }

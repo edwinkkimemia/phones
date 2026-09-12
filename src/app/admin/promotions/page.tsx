@@ -21,7 +21,7 @@ export default function AdminPromotions() {
   return (
     <div>
       <h1 className="section-title !text-2xl">Promotions</h1>
-      <p className="text-xs text-slate-500">Discount codes validated live at checkout via <code>/api/promo/validate</code>.</p>
+      <p className="text-xs text-slate-500">Codes apply instantly at checkout. Share them in banners, WhatsApp and email campaigns.</p>
 
       <form
         className="card mt-4 grid gap-2.5 p-5 sm:grid-cols-5"

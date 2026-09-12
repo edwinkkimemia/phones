@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
-import ImageUploader from "@/components/ImageUploader";
 
 interface Ad {
   id: string; title: string; image: string; link: string;
@@ -20,8 +19,6 @@ async function patchAd(id: string, patch: Record<string, unknown>) {
 
 export default function AdminAds() {
   const [ads, setAds] = useState<Ad[]>([]);
-  const [msg, setMsg] = useState("");
-  const [form, setForm] = useState({ title: "", image: "", link: "/deals", placement: "GLOBAL", target: "all", format: "WIDE" });
 
   const load = () => {
     fetch("/api/ads?list=all").then((r) => r.json()).then((d) => setAds(d.ads ?? [])).catch(() => setAds([]));
@@ -30,19 +27,18 @@ export default function AdminAds() {
 
   return (
     <div>
-      <h1 className="section-title !text-2xl">Ads & Banners</h1>
-      <p className="text-xs text-slate-500">
-        WIDE banners appear above the breadcrumb on product/category pages and between homepage sections; SQUARE ads appear below “Still deciding?” on the product page.
-        Set <strong>shows on</strong> (GLOBAL / HOMEPAGE / CATEGORY / PRODUCT) + <strong>target</strong> to choose exactly where each ad appears.
-        Homepage targets: <code>below-hero</code>, <code>below-deals</code>, <code>above-footer</code> (or “all” for every homepage slot).
-        Category/product targets use the slug (e.g. <code>laptops</code>, <code>hp-probook-440-g10</code>) or “all”.
-      </p>
-
-      <p className="text-xs text-slate-500">
-        WIDE banners appear above the breadcrumb on product/category pages; SQUARE ads appear below “Still deciding?” on the product page.
-        Set <strong>shows on</strong> (GLOBAL / CATEGORY / PRODUCT) + <strong>target</strong> (slug or “all”) to choose exactly where each ad appears —
-        exact matches win, and <strong>priority</strong> (lowest first) decides between several matching ads.
-      </p>
+      <div className="flex flex-wrap items-start gap-2">
+        <div>
+          <h1 className="section-title !text-2xl">Ads & Banners</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
+            WIDE banners appear above breadcrumbs and between homepage sections; SQUARE ads appear below “Still deciding?” on product pages.
+            Set <strong>shows on</strong> + <strong>target</strong> to choose exactly where each ad appears —
+            exact matches win, and <strong>priority</strong> (lowest first) decides ties.
+            Homepage targets: <code>below-hero</code>, <code>below-deals</code>, <code>above-footer</code>.
+          </p>
+        </div>
+        <Link href="/admin/ads/new" className="btn-primary ml-auto !py-2.5 text-xs"><Plus className="h-4 w-4" /> New ad</Link>
+      </div>
 
       <div className="mt-4 space-y-2.5">
         {ads.map((a) => (
@@ -99,41 +95,8 @@ export default function AdminAds() {
             </div>
           </div>
         ))}
-        {ads.length === 0 && <div className="card p-8 text-center text-sm text-slate-400">No ads yet — publish one below.</div>}
+        {ads.length === 0 && <div className="card p-8 text-center text-sm text-slate-400">No ads yet — create your first one.</div>}
       </div>
-
-      <form
-        className="card mt-4 grid gap-2.5 p-5 sm:grid-cols-3"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setMsg("");
-          const res = await fetch("/api/ads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
-          const data = await res.json().catch(() => ({}));
-          setMsg(res.ok ? "Ad created and live." : (data.error ?? "Failed"));
-          if (res.ok) { setForm({ title: "", image: "", link: "/deals", placement: "GLOBAL", target: "all", format: "WIDE" }); load(); }
-        }}
-      >
-        <input className="input sm:col-span-2" placeholder="Title (e.g. Back-to-school laptop sale)" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
-        <select className="input" value={form.format} onChange={(e) => setForm({ ...form, format: e.target.value })}>
-          <option value="WIDE">WIDE (breadcrumb banner)</option>
-          <option value="SQUARE">SQUARE (product sidebar)</option>
-        </select>
-        <input className="input sm:col-span-2" placeholder="Image URL — use 1600px wide for WIDE, 800×800 for SQUARE" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} required />
-        <div className="sm:col-span-3">
-          <ImageUploader compact label="…or upload creative" onUploaded={(urls) => urls[0] && setForm((f) => ({ ...f, image: urls[0] }))} />
-          {form.image && <p className="mt-1 truncate font-mono text-[11px] text-emerald-700">✓ {form.image}</p>}
-        </div>
-        <input className="input" placeholder="Link (e.g. /laptops)" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} required />
-                  <select className="input" value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value })}>
-                    <option value="GLOBAL">GLOBAL (everywhere)</option>
-                    <option value="HOMEPAGE">HOMEPAGE section</option>
-                    <option value="CATEGORY">CATEGORY</option>
-                    <option value="PRODUCT">PRODUCT</option>
-                  </select>
-        <input className="input" placeholder="Target slug or 'all'" value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} required />
-        <button className="btn-primary !py-2.5 text-sm"><Plus className="h-4 w-4" /> Publish ad</button>
-      </form>
-      {msg && <p className="mt-2 text-xs font-bold text-slate-600">{msg}</p>}
     </div>
   );
 }

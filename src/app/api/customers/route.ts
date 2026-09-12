@@ -11,6 +11,6 @@ export async function GET(req: Request) {
     });
     return NextResponse.json({ source: "db", customers });
   } catch {
-    return NextResponse.json({ source: "static", customers: [], note: "Connect the database for live customers." });
+    return NextResponse.json({ source: "static", customers: [], note: "Database unavailable — try again." });
   }
 }

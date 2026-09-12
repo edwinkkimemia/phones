@@ -12,6 +12,6 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     return NextResponse.json({ source: "db", customer });
   } catch {
-    return NextResponse.json({ error: "Connect the database for customer profiles." }, { status: 503 });
+    return NextResponse.json({ error: "Customer lookup unavailable — try again." }, { status: 503 });
   }
 }

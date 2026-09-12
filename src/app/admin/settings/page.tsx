@@ -183,10 +183,10 @@ export default function AdminSettings() {
       <ChangePassword />
       <DeliveryZones />
       <div className="card space-y-2 p-5 text-sm text-slate-600">
-        <p className="font-extrabold text-slate-900">Configuration notes</p>
-        <p>M-Pesa keys, the database URL and session secret live in environment variables (<code>MPESA_*</code>, <code>DATABASE_URL</code>, <code>NEXTAUTH_SECRET</code>).</p>
-        <p>Product descriptions support rich text (paragraphs, lists, bold) — paste HTML from any editor into the product record.</p>
-        <p>Image ads are managed under <strong>Ads & Banners</strong>: WIDE for breadcrumb banners, SQUARE for the product sidebar.</p>
+        <p className="font-extrabold text-slate-900">Good to know</p>
+        <p>Payment keys and hosting configuration are managed securely outside this console.</p>
+        <p>Product descriptions support rich text — headings, paragraphs, lists and bold.</p>
+        <p>Image ads are managed under <strong>Ads & Banners</strong>: WIDE for page banners, SQUARE for the product sidebar.</p>
       </div>
     </div>
   );

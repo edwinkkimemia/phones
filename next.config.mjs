@@ -5,9 +5,11 @@
 // production URL + secret must still be set in Vercel env vars for auth
 // callbacks/sessions to work at runtime.
 const CANONICAL_URL = "https://phonelaptops.co.ke";
-if (!process.env.NEXTAUTH_URL) {
+const rawUrl = process.env.NEXTAUTH_URL;
+if (!rawUrl || rawUrl.includes("SENSITIVE")) {
+  // Also catches Vercel CLI "[SENSITIVE]" placeholders from `vercel env pull`.
   console.warn(
-    `[phonelaptops] NEXTAUTH_URL is missing or empty — defaulting to ${CANONICAL_URL} for this build. ` +
+    `[phonelaptops] NEXTAUTH_URL is missing, empty or a placeholder — defaulting to ${CANONICAL_URL} for this build. ` +
       `Set the real production URL in Vercel → Settings → Environment Variables.`
   );
   process.env.NEXTAUTH_URL = CANONICAL_URL;
