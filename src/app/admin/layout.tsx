@@ -1,14 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Store } from "lucide-react";
-import AdminNav from "./nav";
-import AdminProviders from "./providers";
+import AdminShell from "./shell";
 
 export const metadata = { title: "Admin Dashboard", robots: { index: false, follow: false } };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50">
       <div className="border-b border-slate-200 bg-white">
         <div className="container-x flex items-center gap-3 py-3">
           <Link href="/admin" className="flex items-center gap-2.5">
@@ -26,14 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
       </div>
-      <div className="container-x grid gap-6 py-6 lg:grid-cols-[230px_1fr]">
-        <AdminProviders>
-          <AdminNav />
-        </AdminProviders>
-        <div className="min-w-0">
-          <AdminProviders>{children}</AdminProviders>
-        </div>
-      </div>
+      <AdminShell>{children}</AdminShell>
     </div>
   );
 }
