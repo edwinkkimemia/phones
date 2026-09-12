@@ -3,8 +3,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-guard";
 
-// GET /api/ads?placement=CATEGORY|PRODUCT|BLOG|GUIDES|GLOBAL&target=slug&category=cat&format=WIDE|SQUARE&index=0
+// GET /api/ads?placement=CATEGORY|PRODUCT|BLOG|GUIDES|GLOBAL&target=slug&category=cat&format=WIDE|SQUARE&index=0&seed=visitor-id
 // Tiered: exact → wildcard → parent CATEGORY (for product pages) → GLOBAL.
+// When several ads share the winning tier, ?seed= rotates which one each
+// visitor sees (stable per visitor, uniform across visitors) instead of
+// serving the same creative to everyone.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const placement = (searchParams.get("placement") ?? "GLOBAL").toUpperCase();
@@ -12,6 +15,7 @@ export async function GET(req: Request) {
   const category = (searchParams.get("category") ?? "").trim().toLowerCase();
   const format = (searchParams.get("format") ?? "WIDE").toUpperCase();
   const index = Math.max(0, Number(searchParams.get("index") ?? 0) || 0);
+  const seed = (searchParams.get("seed") ?? "").trim().slice(0, 64);
 
   // Admin list view
   if (searchParams.get("list") === "all") {
@@ -52,20 +56,47 @@ export async function GET(req: Request) {
       (a) =>
         (!a.startsAt || a.startsAt <= now) && (!a.endsAt || a.endsAt >= now)
     );
-    // All matching ads, tiered: exact target → wildcard → parent
+    // Tiers in priority order: exact target → wildcard → parent
     // category (so products inherit their category's banners) → global.
     // findMany is already sortOrder-ordered, so priority holds within tiers.
-    const candidates = [
-      ...live.filter((a) => a.placement === placement && a.target === target),
-      ...live.filter((a) => a.placement === placement && a.target === "all"),
+    const tiers = [
+      live.filter((a) => a.placement === placement && a.target === target),
+      live.filter((a) => a.placement === placement && a.target === "all"),
       ...(category
-        ? live.filter((a) => a.placement === "CATEGORY" && a.target === category)
+        ? [
+            live.filter((a) => a.placement === "CATEGORY" && a.target === category),
+            live.filter((a) => a.placement === "CATEGORY" && a.target === "all"),
+          ]
         : []),
-      ...(category
-        ? live.filter((a) => a.placement === "CATEGORY" && a.target === "all")
-        : []),
-      ...live.filter((a) => a.placement === "GLOBAL"),
+      live.filter((a) => a.placement === "GLOBAL"),
     ];
+    // Rotation: the winning (first non-empty) tier is rotated per visitor so
+    // N ads for one slot split traffic instead of everyone seeing ad #1.
+    // Priority is preserved — lower tiers only fill stacked slots the winner
+    // can't fill. Without ?seed= the order is exactly today's priority order.
+    const winIdx = tiers.findIndex((t) => t.length > 0);
+    let offset = 0;
+    let display: typeof live = [];
+    if (winIdx >= 0) {
+      const winner = tiers[winIdx];
+      if (seed && winner.length > 1) {
+        offset = hashSeed(`${seed}:${placement}:${target}:${format}`) % winner.length;
+      }
+      const seen = new Set<string>();
+      for (const a of [...winner.slice(offset), ...winner.slice(0, offset)]) {
+        seen.add(a.id);
+        display.push(a);
+      }
+      for (const tier of tiers) {
+        for (const a of tier) {
+          if (!seen.has(a.id)) {
+            seen.add(a.id);
+            display.push(a);
+          }
+        }
+      }
+    }
+    const candidates = display;
     const slim = (a: (typeof candidates)[number]) => ({
       id: a.id, title: a.title, placement: a.placement, target: a.target, link: a.link,
     });
@@ -76,12 +107,20 @@ export async function GET(req: Request) {
         source: "db",
         ad: candidates[index],
         candidates: candidates.map(slim),
+        rotation: seed ? { offset } : null,
       });
     }
-    return NextResponse.json({ source: "db", ad: null, candidates: candidates.map(slim) });
+    return NextResponse.json({ source: "db", ad: null, candidates: candidates.map(slim), rotation: seed ? { offset } : null });
   } catch {
     return NextResponse.json({ source: "db", ad: null });
   }
+}
+
+// Stable per-visitor hash (djb2) → uniform rotation offset.
+function hashSeed(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h;
 }
 
 // Server-side creative check: HEAD the image URL (falling back to a

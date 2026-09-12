@@ -103,7 +103,8 @@ function SlotTester() {
   const [category, setCategory] = useState("laptops");
   const [format, setFormat] = useState("WIDE");
   const [index, setIndex] = useState("0");
-  const [result, setResult] = useState<{ ad?: { title: string; image: string; link: string }; candidates?: Resolved[] } | null>(null);
+  const [seed, setSeed] = useState("");
+  const [result, setResult] = useState<{ ad?: { title: string; image: string; link: string }; candidates?: Resolved[]; rotation?: { offset: number } | null } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const test = async () => {
@@ -111,6 +112,7 @@ function SlotTester() {
     try {
       const qs = new URLSearchParams({ placement, target: target.trim() || "all", format, index });
       if (placement === "PRODUCT" && category.trim()) qs.set("category", category.trim());
+      if (seed.trim()) qs.set("seed", seed.trim());
       const res = await fetch(`/api/ads?${qs.toString()}`);
       setResult(await res.json());
     } catch {
@@ -123,8 +125,8 @@ function SlotTester() {
   return (
     <div className="card mt-4 p-5">
       <p className="flex items-center gap-2 font-extrabold"><FlaskConical className="h-4 w-4 text-brand-600" /> Test a slot</p>
-      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — including category inheritance on product pages. Match the slot's format: banners are WIDE, sidebars are SQUARE.</p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-[130px_100px_70px_1fr_1fr_auto]">
+      <p className="mt-1 text-xs text-slate-500">See exactly which ad a page would show — including category inheritance on product pages. Match the slot's format: banners are WIDE, sidebars are SQUARE. Leave visitor blank for priority order; enter any id to preview per-visitor rotation.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[130px_100px_70px_1fr_1fr_1fr_auto]">
         <select value={placement} onChange={(e) => setPlacement(e.target.value)} className="input !py-2 text-xs font-bold">
           <option value="HOMEPAGE">HOMEPAGE</option>
           <option value="CATEGORY">CATEGORY</option>
@@ -137,6 +139,14 @@ function SlotTester() {
           <option value="SQUARE">SQUARE</option>
         </select>
         <AdTargetInput placement={placement} value={target} onChange={setTarget} className="input !py-2 text-xs font-bold" />
+        <input
+          value={seed}
+          onChange={(e) => setSeed(e.target.value)}
+          className="input !py-2 text-xs font-bold"
+          aria-label="Visitor seed"
+          title="Visitor id to preview rotation (blank = priority order)"
+          placeholder="visitor id"
+        />
         <input
           value={index}
           onChange={(e) => setIndex(e.target.value.replace(/\D/g, "") || "0")}
@@ -156,7 +166,9 @@ function SlotTester() {
         <div className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm">
           {result.ad ? (
             <>
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Winner for this slot</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                Winner for this slot{result.rotation ? ` (rotated #${result.rotation.offset} for that visitor)` : ""}
+              </p>
               <div className="mt-1.5 flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={result.ad.image} alt="" className="h-12 w-24 rounded-lg object-cover" />
@@ -198,6 +210,7 @@ function PerformanceReport({ ads }: { ads: Ad[] }) {
       <p className="flex items-center gap-2 font-extrabold"><BarChart3 className="h-4 w-4 text-brand-600" /> Performance</p>
       <p className="mt-1 text-xs text-slate-500">
         {totalImpr.toLocaleString()} impressions • {totalClicks.toLocaleString()} clicks • {ctr(totalClicks, totalImpr)} overall CTR
+        • storefront rotates ads within the winning tier per visitor, so even splits here confirm rotation is working
         {neverShown.length > 0 && (
           <> • <span className="font-bold text-amber-700">{neverShown.length} live ad{neverShown.length === 1 ? "" : "s"} never shown</span></>
         )}

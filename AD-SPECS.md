@@ -52,6 +52,13 @@ and in the sidebar on blog articles and buying guides.
 - **Inheritance** — products automatically show their parent category's banners
   (wide above the breadcrumb, square in the sidebar) unless a product-specific
   ad outranks them. Priority order: exact product → category → global.
+- **Rotation** — when several ads share the winning tier for a slot, visitors
+  are split across them (stable per visitor via an anonymous browser id, so
+  one shopper consistently sees the same creative while different shoppers
+  see different ones). Priority still wins: a lone exact-match ad always shows
+  first; rotation only shares its tier. Stacked sidebar slots show different
+  creatives from the same rotation. Verify splits in **Performance** and
+  preview any visitor with the slot tester's visitor-id field.
 - **Priority** — lowest number wins when several ads match the same slot.
 - Exact matches beat wildcards (`all`), which beat GLOBAL.
 - Use **Pause** instead of delete for seasonal creatives you will reuse.

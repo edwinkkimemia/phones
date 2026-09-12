@@ -54,11 +54,27 @@ export default function AdSlot({
 }) {
   const [ad, setAd] = useState<AdT | null>(null);
   const [badSrc, setBadSrc] = useState<string | null>(null);
+  // Stable anonymous visitor id → ?seed= rotates creatives per visitor
+  // (same visitor always sees the same ad in a slot; visitors split traffic).
+  const [seed] = useState(() => {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return "";
+      let v = window.localStorage.getItem("pl_vid");
+      if (!v) {
+        v = (window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        window.localStorage.setItem("pl_vid", v);
+      }
+      return v;
+    } catch {
+      return "";
+    }
+  });
 
   useEffect(() => {
     let live = true;
     const qs = new URLSearchParams({ placement, target, format, index: String(index) });
     if (category) qs.set("category", category);
+    if (seed) qs.set("seed", seed);
     fetch(`/api/ads?${qs.toString()}`)
       .then((r) => r.json())
       .then(async (d) => {
@@ -78,6 +94,7 @@ export default function AdSlot({
               format,
               index: String(index),
             });
+            if (seed) gqs.set("seed", seed);
             const gr = await fetch(`/api/ads?${gqs.toString()}`);
             const gd = await gr.json();
             if (live) setAd(gd.ad ?? null);
@@ -92,7 +109,7 @@ export default function AdSlot({
     return () => {
       live = false;
     };
-  }, [placement, target, category, format, index]);
+  }, [placement, target, category, format, index, seed]);
 
   // Count a delivery each time a creative resolves for this slot.
   useEffect(() => {
