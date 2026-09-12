@@ -21,17 +21,17 @@ import { STORE_PHONE_DISPLAY } from "@/lib/utils";
 import { POPULAR_SEARCHES } from "@/data/catalog";
 
 const NAV = [
+  { label: "Deals", href: "/deals", hot: true },
   { label: "Laptops", href: "/laptops" },
-  { label: "Desktops", href: "/desktops" },
   { label: "Phones", href: "/phones" },
   { label: "iPhones", href: "/iphones" },
+  { label: "Desktops", href: "/desktops" },
   { label: "Tablets", href: "/tablets" },
   { label: "Wearables", href: "/wearables" },
   { label: "Storage", href: "/storage" },
+  { label: "Accessories", href: "/accessories" },
   { label: "Laptop Parts", href: "/laptop-parts" },
   { label: "Phone Parts", href: "/phone-parts" },
-  { label: "Accessories", href: "/accessories" },
-  { label: "Deals", href: "/deals", hot: true },
   { label: "New Arrivals", href: "/new-arrivals" },
 ];
 
