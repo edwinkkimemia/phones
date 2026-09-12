@@ -60,14 +60,16 @@ export async function GET(req: Request) {
     const slim = (a: (typeof candidates)[number]) => ({
       id: a.id, title: a.title, placement: a.placement, target: a.target, link: a.link,
     });
-    if (candidates.length > 0) {
+    // No wrap-around: slot N only renders when N distinct ads match.
+    // A lone ad can never leak across slots/pages it wasn't targeted at.
+    if (index < candidates.length) {
       return NextResponse.json({
         source: "db",
-        ad: candidates[index % candidates.length],
+        ad: candidates[index],
         candidates: candidates.map(slim),
       });
     }
-    return NextResponse.json({ source: "db", ad: null, candidates: [] });
+    return NextResponse.json({ source: "db", ad: null, candidates: candidates.map(slim) });
   } catch {
     return NextResponse.json({ source: "db", ad: null });
   }

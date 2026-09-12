@@ -261,6 +261,17 @@ async function main() {
   }
   console.log("Seeded site settings.");
 
+  // Blog posts (update:{} — editors own them after first seed).
+  const { BLOG_POSTS } = await import("../src/data/blog-posts");
+  for (const b of BLOG_POSTS) {
+    await prisma.blogPost.upsert({
+      where: { slug: b.slug },
+      update: {},
+      create: { ...b, published: true },
+    }).catch(() => null);
+  }
+  console.log(`Seeded ${BLOG_POSTS.length} blog posts.`);
+
   // Single source of truth top-up: guarantees every default ad exists with a
   // distinct id (older inline blocks reused one id for two squares).
   // update:{} — never overwrites admin edits.

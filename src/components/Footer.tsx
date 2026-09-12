@@ -44,6 +44,8 @@ const COLS: { title: string; links: { label: string; href: string }[] }[] = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
+      { label: "Blog", href: "/blog" },
+      { label: "Buying Guides", href: "/guides" },
       { label: "Contact", href: "/contact" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms & Conditions", href: "/terms" },

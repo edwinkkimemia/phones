@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 
 // Social share row for product pages (free distribution loop).
-export default function ShareButtons({ name, price }: { name: string; price: number }) {
+export default function ShareButtons({ name, price }: { name: string; price?: number }) {
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState("");
 
@@ -13,7 +13,7 @@ export default function ShareButtons({ name, price }: { name: string; price: num
     setUrl(window.location.href);
   }, []);
 
-  const text = `${name} — KES ${price.toLocaleString("en-KE")} at PhoneLaptops.co.ke`;
+  const text = typeof price === "number" ? `${name} — KES ${price.toLocaleString("en-KE")} at PhoneLaptops.co.ke` : `${name} — via PhoneLaptops.co.ke`;
   const links = [
     { label: "WhatsApp", href: `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, Icon: WhatsAppIcon },
     { label: "X", href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, Icon: Twitter },

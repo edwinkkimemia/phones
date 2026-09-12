@@ -57,14 +57,14 @@ enum DiscountType {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String?
-  email        String?  @unique
-  phone        String?  @unique
+  email        String?   @unique
+  phone        String?   @unique
   passwordHash String?
-  role         Role     @default(CUSTOMER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         Role      @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   orders       Order[]
   reviews      Review[]
   accounts     Account[]
@@ -126,27 +126,27 @@ model Brand {
 }
 
 model Product {
-  id             String            @id @default(cuid())
-  slug           String            @unique
+  id             String           @id @default(cuid())
+  slug           String           @unique
   name           String
   brandId        String?
-  brand          Brand?            @relation(fields: [brandId], references: [id])
+  brand          Brand?           @relation(fields: [brandId], references: [id])
   categoryId     String?
-  category       Category?         @relation(fields: [categoryId], references: [id])
+  category       Category?        @relation(fields: [categoryId], references: [id])
   tagline        String?
-  description    String            @db.Text
+  description    String           @db.Text
   price          Int // minor units (KES cents not used — store whole KES)
   compareAtPrice Int?
-  condition      ProductCondition  @default(NEW)
-  stockQty       Int               @default(0)
-  stockStatus    StockStatus       @default(IN_STOCK)
-  rating         Float             @default(0)
-  reviewCount    Int               @default(0)
-  soldCount      Int               @default(0)
-  isFeatured     Boolean           @default(false)
-  isDeal         Boolean           @default(false)
-  isNew          Boolean           @default(false)
-  isBestSeller   Boolean           @default(false)
+  condition      ProductCondition @default(NEW)
+  stockQty       Int              @default(0)
+  stockStatus    StockStatus      @default(IN_STOCK)
+  rating         Float            @default(0)
+  reviewCount    Int              @default(0)
+  soldCount      Int              @default(0)
+  isFeatured     Boolean          @default(false)
+  isDeal         Boolean          @default(false)
+  isNew          Boolean          @default(false)
+  isBestSeller   Boolean          @default(false)
   images         ProductImage[]
   variants       ProductVariant[]
   specs          ProductSpec[]
@@ -154,8 +154,8 @@ model Product {
   orderItems     OrderItem[]
   seoTitle       String?
   seoDescription String?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([categoryId, brandId, price, rating, soldCount, createdAt])
   @@index([slug])
@@ -171,14 +171,14 @@ model ProductImage {
 }
 
 model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name      String // e.g. "Storage", "Colour"
-  value     String // e.g. "256GB", "Midnight"
-  priceDelta Int    @default(0)
-  stockQty  Int     @default(0)
-  sku       String?
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name       String // e.g. "Storage", "Colour"
+  value      String // e.g. "256GB", "Midnight"
+  priceDelta Int     @default(0)
+  stockQty   Int     @default(0)
+  sku        String?
 }
 
 model ProductSpec {
@@ -243,18 +243,18 @@ model OrderItem {
 }
 
 model Payment {
-  id              String        @id @default(cuid())
-  orderId         String
-  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  method          PaymentMethod @default(MPESA)
-  status          PaymentStatus @default(PENDING)
-  amount          Int
-  phone           String?
-  mpesaReceipt    String?
+  id                String        @id @default(cuid())
+  orderId           String
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method            PaymentMethod @default(MPESA)
+  status            PaymentStatus @default(PENDING)
+  amount            Int
+  phone             String?
+  mpesaReceipt      String?
   checkoutRequestId String?
-  rawCallback     Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  rawCallback       Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model PromoCode {
@@ -286,12 +286,12 @@ model Review {
 }
 
 model DeliveryZone {
-  id        String  @id @default(cuid())
-  county    String
-  town      String
-  fee       Int     @default(0)
-  eta       String?
-  active    Boolean @default(true)
+  id     String  @id @default(cuid())
+  county String
+  town   String
+  fee    Int     @default(0)
+  eta    String?
+  active Boolean @default(true)
 }
 
 model ContentBlock {
@@ -319,6 +319,23 @@ model SiteSetting {
   key       String   @id
   value     String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+// Blog posts: hard-marketing Kenyan buying content, managed from /admin → Blog.
+model BlogPost {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  excerpt        String   @db.Text
+  cover          String?
+  body           String   @db.Text
+  tags           String[]
+  published      Boolean  @default(false)
+  seoTitle       String?
+  seoDescription String?
+  views          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // Email marketing list (footer/newsletter form + discount popup).
