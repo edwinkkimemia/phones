@@ -1,15 +1,18 @@
 import Link from "next/link";
-import { Truck, ShieldCheck, RotateCcw, Phone, Mail, MapPin, ChevronRight, BadgeCheck, Tag, FileCheck, Undo2 } from "lucide-react";
+import Image from "next/image";
+import { Truck, ShieldCheck, RotateCcw, Phone, Mail, MapPin, ChevronRight, BadgeCheck, Tag, FileCheck, Undo2, BookOpen, Newspaper } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
 import { faqJsonLd } from "@/lib/seo";
 import PageHero from "@/components/PageHero";
 import ContactForm from "@/components/ContactForm";
+import { PRODUCTS } from "@/data/catalog";
+import { getPublishedPosts } from "@/lib/blog";
+import { getPublishedGuides } from "@/lib/guides";
+import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="container-x max-w-3xl py-10 md:py-14">
-      <div className="card space-y-4 p-6 text-[15px] leading-relaxed text-slate-600 md:p-8">{children}</div>
-    </div>
+    <div className="card space-y-4 p-6 text-[15px] leading-relaxed text-slate-600 md:p-8">{children}</div>
   );
 }
 
@@ -20,6 +23,87 @@ function Crumb({ current }: { current: string }) {
       <ChevronRight className="h-3 w-3" />
       <span className="truncate font-semibold text-slate-800">{current}</span>
     </nav>
+  );
+}
+
+function PageGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="container-x grid gap-8 py-10 md:py-14 lg:grid-cols-[1fr_320px]">
+      <div className="min-w-0">{children}</div>
+      <InfoSidebar />
+    </div>
+  );
+}
+
+async function InfoSidebar() {
+  const trending = [...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount).slice(0, 4);
+  const [posts, guides] = await Promise.all([
+    getPublishedPosts().then((p) => p.slice(0, 4)).catch(() => []),
+    getPublishedGuides().then((g) => g.slice(0, 4)).catch(() => []),
+  ]);
+  return (
+    <aside className="space-y-4 lg:sticky lg:top-36 lg:self-start">
+      <div className="card p-4">
+        <p className="font-extrabold">Trending products</p>
+        <div className="mt-3 space-y-2.5">
+          {trending.map((r) => (
+            <Link key={r.id} href={`/product/${r.slug}`} className="flex items-center gap-2.5 rounded-2xl border border-slate-100 p-2 transition hover:border-brand-300 hover:shadow-card">
+              <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-50">
+                {r.images[0] && <Image src={r.images[0].url} alt={r.name} fill sizes="56px" className="object-cover" />}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-xs font-bold text-slate-800">{r.name}</span>
+                <span className="text-xs font-extrabold text-brand-700">{kes(r.price)}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+        <Link href="/deals" className="mt-3 block rounded-xl bg-ink-950 py-2.5 text-center text-xs font-bold text-white hover:bg-ink-800">
+          Shop all deals →
+        </Link>
+      </div>
+
+      {posts.length > 0 && (
+        <div className="card p-4">
+          <p className="flex items-center gap-1.5 font-extrabold"><Newspaper className="h-4 w-4 text-brand-600" /> Latest articles</p>
+          <div className="mt-2 divide-y divide-slate-100">
+            {posts.map((p) => (
+              <Link key={p.id} href={`/blog/${p.slug}`} className="block py-2.5 text-sm font-bold leading-snug text-slate-700 hover:text-brand-700">
+                {p.title}
+              </Link>
+            ))}
+          </div>
+          <Link href="/blog" className="mt-1 block text-xs font-bold text-brand-700 hover:underline">All articles →</Link>
+        </div>
+      )}
+
+      {guides.length > 0 && (
+        <div className="card p-4">
+          <p className="flex items-center gap-1.5 font-extrabold"><BookOpen className="h-4 w-4 text-brand-600" /> Buying guides</p>
+          <div className="mt-2 divide-y divide-slate-100">
+            {guides.map((g) => (
+              <Link key={g.slug} href={`/guides/${g.slug}`} className="block py-2.5 text-sm font-bold leading-snug text-slate-700 hover:text-brand-700">
+                {g.title}
+              </Link>
+            ))}
+          </div>
+          <Link href="/guides" className="mt-1 block text-xs font-bold text-brand-700 hover:underline">All guides →</Link>
+        </div>
+      )}
+
+      <div className="card bg-emerald-600 !border-emerald-600 p-4 text-white">
+        <p className="font-extrabold">Need help? Ask an expert</p>
+        <p className="mt-1 text-xs text-emerald-50">Real specialists reply in minutes, 8am–8pm daily.</p>
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello PhoneLaptops! I have a question.")}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 block rounded-xl bg-white py-2.5 text-center text-xs font-extrabold text-emerald-700"
+        >
+          Chat on WhatsApp
+        </a>
+      </div>
+    </aside>
   );
 }
 
@@ -44,16 +128,18 @@ export function DeliveryPage() {
         image="https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="Delivery" />
-      <Shell>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><Truck className="h-5 w-5 text-brand-600" /> Fast, tracked, reliable</p>
-        <p>Order before 3pm for same-day dispatch in Nairobi. All parcels are packed securely, insured in transit and confirmed by phone before dispatch.</p>
-        <table className="w-full overflow-hidden rounded-xl text-sm">
-          <thead><tr className="bg-slate-100 text-left"><th className="p-3">Zone</th><th className="p-3">Typical ETA</th></tr></thead>
-          <tbody>{zones.map(([z, e]) => <tr key={z} className="border-t border-slate-100"><td className="p-3 font-semibold">{z}</td><td className="p-3">{e}</td></tr>)}</tbody>
-        </table>
-        <p className="text-sm text-slate-500">Exact delivery fees are configured per zone and always shown at checkout before you pay. Pay with M-Pesa or on delivery where available.</p>
-        <Link href="/track-order" className="btn-primary w-fit">Track My Order</Link>
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <p className="flex items-center gap-2 font-bold text-slate-900"><Truck className="h-5 w-5 text-brand-600" /> Fast, tracked, reliable</p>
+          <p>Order before 3pm for same-day dispatch in Nairobi. All parcels are packed securely, insured in transit and confirmed by phone before dispatch.</p>
+          <table className="w-full overflow-hidden rounded-xl text-sm">
+            <thead><tr className="bg-slate-100 text-left"><th className="p-3">Zone</th><th className="p-3">Typical ETA</th></tr></thead>
+            <tbody>{zones.map(([z, e]) => <tr key={z} className="border-t border-slate-100"><td className="p-3 font-semibold">{z}</td><td className="p-3">{e}</td></tr>)}</tbody>
+          </table>
+          <p className="text-sm text-slate-500">Exact delivery fees are configured per zone and always shown at checkout before you pay. Pay with M-Pesa or on delivery where available.</p>
+          <Link href="/track-order" className="btn-primary w-fit">Track My Order</Link>
+        </Shell>
+      </PageGrid>
     </>
   );
 }
@@ -74,24 +160,26 @@ export function ContactPage() {
         image="https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="Contact" />
-      <Shell>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <a href="tel:+254715135141" className="card p-4 text-center"><Phone className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">+254 715 135 141</p><p className="text-xs text-slate-500">8am–8pm daily</p></a>
-          <a href="https://wa.me/254715135141" target="_blank" rel="noreferrer" className="card p-4 text-center"><WhatsAppIcon className="mx-auto h-5 w-5 text-[#25D366]" /><p className="mt-2 text-sm font-bold">WhatsApp Us</p><p className="text-xs text-slate-500">0715 135 141 • Fastest</p></a>
-          <a href="mailto:support@phonelaptops.co.ke" className="card p-4 text-center"><Mail className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">Email</p><p className="text-xs text-slate-500">Replies within hours</p></a>
-        </div>
-        <p className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4" /> Moi Avenue, Nairobi, Kenya — pickup available after phone confirmation.</p>
-        <ContactForm />
-        <div className="rounded-2xl bg-slate-50 p-4">
-          <p className="text-sm font-extrabold text-slate-900">What happens next?</p>
-          <ol className="mt-2 space-y-1.5 text-sm">
-            {steps.map(([n, t]) => (
-              <li key={n} className="flex gap-2.5"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink-950 text-[11px] font-extrabold text-white">{n}</span>{t}</li>
-            ))}
-          </ol>
-        </div>
-        <p className="text-sm">Checking an order? <Link href="/track-order" className="font-bold text-brand-700 hover:underline">Track it live →</Link> <span className="text-slate-400">•</span> Quick answers: <Link href="/faqs" className="font-bold text-brand-700 hover:underline">FAQs →</Link> <span className="text-slate-400">•</span> Cover question: <Link href="/warranty" className="font-bold text-brand-700 hover:underline">Warranty →</Link></p>
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <a href="tel:+254715135141" className="card p-4 text-center"><Phone className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">+254 715 135 141</p><p className="text-xs text-slate-500">8am–8pm daily</p></a>
+            <a href="https://wa.me/254715135141" target="_blank" rel="noreferrer" className="card p-4 text-center"><WhatsAppIcon className="mx-auto h-5 w-5 text-[#25D366]" /><p className="mt-2 text-sm font-bold">WhatsApp Us</p><p className="text-xs text-slate-500">0715 135 141 • Fastest</p></a>
+            <a href="mailto:support@phonelaptops.co.ke" className="card p-4 text-center"><Mail className="mx-auto h-5 w-5 text-brand-600" /><p className="mt-2 text-sm font-bold">Email</p><p className="text-xs text-slate-500">Replies within hours</p></a>
+          </div>
+          <p className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4" /> Moi Avenue, Nairobi, Kenya — pickup available after phone confirmation.</p>
+          <ContactForm />
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <p className="text-sm font-extrabold text-slate-900">What happens next?</p>
+            <ol className="mt-2 space-y-1.5 text-sm">
+              {steps.map(([n, t]) => (
+                <li key={n} className="flex gap-2.5"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink-950 text-[11px] font-extrabold text-white">{n}</span>{t}</li>
+              ))}
+            </ol>
+          </div>
+          <p className="text-sm">Checking an order? <Link href="/track-order" className="font-bold text-brand-700 hover:underline">Track it live →</Link> <span className="text-slate-400">•</span> Quick answers: <Link href="/faqs" className="font-bold text-brand-700 hover:underline">FAQs →</Link> <span className="text-slate-400">•</span> Cover question: <Link href="/warranty" className="font-bold text-brand-700 hover:underline">Warranty →</Link></p>
+        </Shell>
+      </PageGrid>
     </>
   );
 }
@@ -121,43 +209,47 @@ export function AboutPage() {
         image="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="About" />
-      <div className="container-x max-w-3xl py-10 md:py-14">
-        <div className="card space-y-4 p-6 text-[15px] leading-relaxed text-slate-600 md:p-8">
-          <p><strong className="text-slate-900">PhoneLaptops.co.ke</strong> exists for one reason: to make buying genuine tech in Kenya simple, fairly priced and stress-free.</p>
-          <p>We stock the latest laptops, iPhones, smartphones, tablets and accessories — every unit sourced from trusted suppliers, clearly graded (Brand New vs Pre-Owned), covered by warranty and delivered across Kenya.</p>
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            {stats.map(([v, l]) => (
-              <div key={l} className="rounded-2xl bg-slate-50 p-4 text-center">
-                <p className="font-display text-xl font-extrabold text-slate-900">{v}</p>
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">{l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <h2 className="section-title mt-10">How we earn your trust</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {values.map(({ Icon, t, d }) => (
-            <div key={t} className="card p-5">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                <Icon className="h-5 w-5" />
-              </span>
-              <p className="mt-3 font-bold text-slate-900">{t}</p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-500">{d}</p>
+      <PageGrid>
+        <div className="min-w-0 space-y-6">
+          <Shell>
+            <p><strong className="text-slate-900">PhoneLaptops.co.ke</strong> exists for one reason: to make buying genuine tech in Kenya simple, fairly priced and stress-free.</p>
+            <p>We stock the latest laptops, iPhones, smartphones, tablets and accessories — every unit sourced from trusted suppliers, clearly graded (Brand New vs Pre-Owned), covered by warranty and delivered across Kenya.</p>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {stats.map(([v, l]) => (
+                <div key={l} className="rounded-2xl bg-slate-50 p-4 text-center">
+                  <p className="font-display text-xl font-extrabold text-slate-900">{v}</p>
+                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">{l}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </Shell>
 
-        <div className="card mt-6 bg-ink-950 !border-ink-950 p-6 text-white md:p-8">
-          <p className="font-display text-xl font-extrabold">Latest Tech. Honest Prices. Delivered.</p>
-          <p className="mt-1 text-sm text-slate-300">That is the promise on every order. Come see it in action:</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/deals" className="btn-primary !bg-accent !text-ink-950 hover:!bg-white">Shop today&apos;s deals</Link>
-            <Link href="/guides" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Read buying guides</Link>
-            <Link href="/contact" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Talk to us</Link>
+          <div>
+            <h2 className="section-title">How we earn your trust</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {values.map(({ Icon, t, d }) => (
+                <div key={t} className="card p-5">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-50 text-brand-700">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <p className="mt-3 font-bold text-slate-900">{t}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-500">{d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card bg-ink-950 !border-ink-950 p-6 text-white md:p-8">
+            <p className="font-display text-xl font-extrabold">Latest Tech. Honest Prices. Delivered.</p>
+            <p className="mt-1 text-sm text-slate-300">That is the promise on every order. Come see it in action:</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/deals" className="btn-primary !bg-accent !text-ink-950 hover:!bg-white">Shop today&apos;s deals</Link>
+              <Link href="/guides" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Read buying guides</Link>
+              <Link href="/contact" className="inline-flex items-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold hover:bg-white/10">Talk to us</Link>
+            </div>
           </div>
         </div>
-      </div>
+      </PageGrid>
     </>
   );
 }
@@ -184,40 +276,42 @@ export function WarrantyPage() {
         image="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="Warranty" />
-      <Shell>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><ShieldCheck className="h-5 w-5 text-emerald-600" /> What is covered</p>
-        <div className="overflow-hidden rounded-xl border border-slate-100 text-sm">
-          {cover.map(([k, v]) => (
-            <div key={k} className="grid gap-1 border-t border-slate-100 p-3 first:border-0 sm:grid-cols-[220px_1fr]">
-              <p className="font-bold text-slate-900">{k}</p>
-              <p>{v}</p>
-            </div>
-          ))}
-        </div>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><RotateCcw className="h-5 w-5 text-brand-600" /> 7-day dead-on-arrival cover</p>
-        <p>Arrived faulty? Contact us within 7 days of delivery with photos or video and we replace or refund after verification. Items must come back complete — device, accessories and packaging.</p>
-        <p className="font-bold text-slate-900">How to claim — three steps</p>
-        <ol className="space-y-2.5">
-          {steps.map(([t, d], i) => (
-            <li key={t} className="flex gap-3">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
-              <span><strong className="text-slate-900">{t}.</strong> {d}</span>
-            </li>
-          ))}
-        </ol>
-        <p className="text-sm text-slate-500">Not covered: physical or liquid damage, unauthorised repairs or modifications, normal battery wear beyond the stated health, and lost accessories. Keep your receipt — it is your warranty document.</p>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={`https://wa.me/254715135141?text=${encodeURIComponent("Hello PhoneLaptops! I'd like to start a warranty claim. My order number is: ")}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-whatsapp"
-          >
-            <WhatsAppIcon className="mx-auto h-4 w-4" /> Start a claim
-          </a>
-          <Link href="/returns" className="btn-ghost">Returns policy →</Link>
-        </div>
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <p className="flex items-center gap-2 font-bold text-slate-900"><ShieldCheck className="h-5 w-5 text-emerald-600" /> What is covered</p>
+          <div className="overflow-hidden rounded-xl border border-slate-100 text-sm">
+            {cover.map(([k, v]) => (
+              <div key={k} className="grid gap-1 border-t border-slate-100 p-3 first:border-0 sm:grid-cols-[220px_1fr]">
+                <p className="font-bold text-slate-900">{k}</p>
+                <p>{v}</p>
+              </div>
+            ))}
+          </div>
+          <p className="flex items-center gap-2 font-bold text-slate-900"><RotateCcw className="h-5 w-5 text-brand-600" /> 7-day dead-on-arrival cover</p>
+          <p>Arrived faulty? Contact us within 7 days of delivery with photos or video and we replace or refund after verification. Items must come back complete — device, accessories and packaging.</p>
+          <p className="font-bold text-slate-900">How to claim — three steps</p>
+          <ol className="space-y-2.5">
+            {steps.map(([t, d], i) => (
+              <li key={t} className="flex gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
+                <span><strong className="text-slate-900">{t}.</strong> {d}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-sm text-slate-500">Not covered: physical or liquid damage, unauthorised repairs or modifications, normal battery wear beyond the stated health, and lost accessories. Keep your receipt — it is your warranty document.</p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={`https://wa.me/254715135141?text=${encodeURIComponent("Hello PhoneLaptops! I'd like to start a warranty claim. My order number is: ")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-whatsapp"
+            >
+              <WhatsAppIcon className="mx-auto h-4 w-4" /> Start a claim
+            </a>
+            <Link href="/returns" className="btn-ghost">Returns policy →</Link>
+          </div>
+        </Shell>
+      </PageGrid>
     </>
   );
 }
@@ -239,26 +333,28 @@ export function ReturnsPage() {
         image="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="Returns" />
-      <Shell>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><Undo2 className="h-5 w-5 text-brand-600" /> Faulty on arrival (7 days)</p>
-        <p>Dead, damaged or materially not as described? We replace or refund in full after verification — return courier on us within Nairobi for confirmed faults.</p>
-        <p className="flex items-center gap-2 font-bold text-slate-900"><FileCheck className="h-5 w-5 text-brand-600" /> Change of mind (7 days)</p>
-        <p>Sealed, unused items in original packaging qualify for replacement or refund within 7 days with your receipt. Opened accessories and fitted parts are handled case-by-case — ask us first and we will be straight with you. Delivery fees are refundable only where the error was ours.</p>
-        <p className="font-bold text-slate-900">The process</p>
-        <ol className="space-y-2.5">
-          {steps.map(([t, d], i) => (
-            <li key={t} className="flex gap-3">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
-              <span><strong className="text-slate-900">{t}.</strong> {d}</span>
-            </li>
-          ))}
-        </ol>
-        <p className="text-sm text-slate-500">Everything must come back complete — device, chargers, manuals and box. Refunds go to the M-Pesa number on the order unless you ask otherwise.</p>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/contact" className="btn-primary w-fit">Contact us</Link>
-          <Link href="/warranty" className="btn-ghost">Warranty terms →</Link>
-        </div>
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <p className="flex items-center gap-2 font-bold text-slate-900"><Undo2 className="h-5 w-5 text-brand-600" /> Faulty on arrival (7 days)</p>
+          <p>Dead, damaged or materially not as described? We replace or refund in full after verification — return courier on us within Nairobi for confirmed faults.</p>
+          <p className="flex items-center gap-2 font-bold text-slate-900"><FileCheck className="h-5 w-5 text-brand-600" /> Change of mind (7 days)</p>
+          <p>Sealed, unused items in original packaging qualify for replacement or refund within 7 days with your receipt. Opened accessories and fitted parts are handled case-by-case — ask us first and we will be straight with you. Delivery fees are refundable only where the error was ours.</p>
+          <p className="font-bold text-slate-900">The process</p>
+          <ol className="space-y-2.5">
+            {steps.map(([t, d], i) => (
+              <li key={t} className="flex gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink-950 text-xs font-extrabold text-white">{i + 1}</span>
+                <span><strong className="text-slate-900">{t}.</strong> {d}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-sm text-slate-500">Everything must come back complete — device, chargers, manuals and box. Refunds go to the M-Pesa number on the order unless you ask otherwise.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/contact" className="btn-primary w-fit">Contact us</Link>
+            <Link href="/warranty" className="btn-ghost">Warranty terms →</Link>
+          </div>
+        </Shell>
+      </PageGrid>
     </>
   );
 }
@@ -282,15 +378,17 @@ export function FaqPage() {
         image="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=80"
       />
       <Crumb current="FAQs" />
-      <Shell>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }} />
-        {faqs.map(([q, a]) => (
-          <div key={q}>
-            <p className="font-bold text-slate-900">{q}</p>
-            <p className="mt-1">{a}</p>
-          </div>
-        ))}
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }} />
+          {faqs.map(([q, a]) => (
+            <div key={q}>
+              <p className="font-bold text-slate-900">{q}</p>
+              <p className="mt-1">{a}</p>
+            </div>
+          ))}
+        </Shell>
+      </PageGrid>
     </>
   );
 }
@@ -356,16 +454,18 @@ export function LegalPage({ kind }: { kind: "privacy" | "terms" | "returns" }) {
     <>
       <PageHero eyebrow="Legal" heading={hero.heading} blurb={hero.blurb} badges={hero.badges} image={hero.image} />
       <Crumb current={crumb} />
-      <Shell>
-        <p className="text-sm text-slate-400">Last updated: {updated}. Questions about this page? <Link href="/contact" className="font-bold text-brand-700 hover:underline">Contact us →</Link></p>
-        {sections.map((s) => (
-          <PolicySection key={s.h} h={s.h}>
-            {s.body.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </PolicySection>
-        ))}
-      </Shell>
+      <PageGrid>
+        <Shell>
+          <p className="text-sm text-slate-400">Last updated: {updated}. Questions about this page? <Link href="/contact" className="font-bold text-brand-700 hover:underline">Contact us →</Link></p>
+          {sections.map((s) => (
+            <PolicySection key={s.h} h={s.h}>
+              {s.body.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </PolicySection>
+          ))}
+        </Shell>
+      </PageGrid>
     </>
   );
 }
