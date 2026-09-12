@@ -12,11 +12,6 @@ export async function GET(req: Request) {
   const format = (searchParams.get("format") ?? "WIDE").toUpperCase();
   const index = Math.max(0, Number(searchParams.get("index") ?? 0) || 0);
 
-  const dedup = <T extends { id: string }>(list: (T | undefined)[]): T[] => {
-    const seen = new Set<string>();
-    return list.filter((x): x is T => !!x && !seen.has(x.id) && (seen.add(x.id), true));
-  };
-
   // Admin list view
   if (searchParams.get("list") === "all") {
     const denied = await requireAdmin();
@@ -47,10 +42,13 @@ export async function GET(req: Request) {
       (a) =>
         (!a.startsAt || a.startsAt <= now) && (!a.endsAt || a.endsAt >= now)
     );
-    const exact = live.find((a) => a.placement === placement && a.target === target);
-    const wildcard = live.find((a) => a.placement === placement && a.target === "all");
-    const global = live.find((a) => a.placement === "GLOBAL");
-    const candidates = dedup([exact, wildcard, global]);
+    // All matching ads, tiered: exact target → wildcard → global.
+    // findMany is already sortOrder-ordered, so priority holds within tiers.
+    const candidates = [
+      ...live.filter((a) => a.placement === placement && a.target === target),
+      ...live.filter((a) => a.placement === placement && a.target === "all"),
+      ...live.filter((a) => a.placement === "GLOBAL"),
+    ];
     if (candidates.length > 0)
       return NextResponse.json({ source: "db", ad: candidates[index % candidates.length] });
     return NextResponse.json({ source: "db", ad: null });
