@@ -11,6 +11,8 @@ export interface AdT {
 // Full-width (WIDE) image ad above breadcrumbs / between sections,
 // or SQUARE ads for sidebars (product + blog pages).
 // Resolved server-side: exact match wins, then parent category, then global.
+// Falls back client-side to the admin's GLOBAL ads so a slot never stays
+// empty when a global fallback exists.
 // Managed from /admin → Ads & Banners (AdSlot model).
 export default function AdSlot({
   placement,
@@ -21,7 +23,7 @@ export default function AdSlot({
   bare = false,
   className,
 }: {
-  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG";
+  placement: "HOMEPAGE" | "CATEGORY" | "PRODUCT" | "BLOG" | "GLOBAL";
   target?: string;
   category?: string;
   format?: "WIDE" | "SQUARE";
@@ -37,8 +39,32 @@ export default function AdSlot({
     if (category) qs.set("category", category);
     fetch(`/api/ads?${qs.toString()}`)
       .then((r) => r.json())
-      .then((d) => {
-        if (live) setAd(d.ad ?? null);
+      .then(async (d) => {
+        if (!live) return;
+        if (d.ad) {
+          setAd(d.ad);
+          return;
+        }
+        // Explicit GLOBAL fallback to the ads set by admin (/admin → Ads & Banners).
+        // The API already tiers GLOBAL last, but this guarantees a global creative
+        // fills the slot even if placement filtering ever changes.
+        if (placement !== "GLOBAL") {
+          try {
+            const gqs = new URLSearchParams({
+              placement: "GLOBAL",
+              target: "all",
+              format,
+              index: String(index),
+            });
+            const gr = await fetch(`/api/ads?${gqs.toString()}`);
+            const gd = await gr.json();
+            if (live) setAd(gd.ad ?? null);
+          } catch {
+            if (live) setAd(null);
+          }
+        } else {
+          setAd(null);
+        }
       })
       .catch(() => null);
     return () => {
@@ -48,9 +74,11 @@ export default function AdSlot({
 
   if (!ad) return null;
 
+  const external = /^https?:\/\//i.test(ad.link);
   const inner = (
     <a
       href={ad.link}
+      {...(external ? { target: "_blank", rel: "noreferrer noopener" } : {})}
       className={cn(
         "group relative block overflow-hidden rounded-2xl border border-slate-200 shadow-[0_1px_2px_rgba(16,24,40,.06),0_8px_24px_-12px_rgba(16,24,40,.18)]",
         className

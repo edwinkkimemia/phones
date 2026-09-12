@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { BookOpen, ArrowRight, Clock } from "lucide-react";
+import AdSlot from "@/components/AdSlot";
 import { GUIDES } from "@/data/guides";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function GuidesPage() {
       <p className="mt-2 max-w-2xl text-sm text-slate-500">
         No jargon, no sponsored rankings — just honest advice from people who sell (and support) these devices every day.
       </p>
+      <AdSlot placement="BLOG" target="guides" bare className="mt-4" />
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {GUIDES.map((g) => (
           <Link key={g.slug} href={`/guides/${g.slug}`} className="card group p-6 transition hover:-translate-y-0.5 hover:shadow-pop">

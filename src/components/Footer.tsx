@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-import { WhatsAppIcon, TikTokIcon } from "@/components/icons";
+import { Phone, Mail, MapPin, Instagram, Youtube } from "lucide-react";
+import { WhatsAppIcon, TikTokIcon, XIcon, FacebookIcon } from "@/components/icons";
 
 const SOCIALS = [
-  { label: "Facebook", href: "https://facebook.com/phonelaptopske", Icon: Facebook },
+  { label: "Facebook", href: "https://facebook.com/phonelaptopske", Icon: FacebookIcon },
   { label: "Instagram", href: "https://instagram.com/phonelaptopske", Icon: Instagram },
-  { label: "X (Twitter)", href: "https://x.com/phonelaptopske", Icon: Twitter },
+  { label: "X (Twitter)", href: "https://x.com/phonelaptopske", Icon: XIcon },
   { label: "YouTube", href: "https://youtube.com/@phonelaptopske", Icon: Youtube },
   { label: "TikTok", href: "https://tiktok.com/@phonelaptopske", Icon: TikTokIcon },
 ];

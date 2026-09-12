@@ -2,9 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ChevronRight, Clock, Eye, MessageCircle } from "lucide-react";
+import { ChevronRight, Clock, Eye } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import AdSlot from "@/components/AdSlot";
+import { WhatsAppIcon } from "@/components/icons";
 import { WHATSAPP_NUMBER, kes } from "@/lib/utils";
 import { getPublishedPost } from "@/lib/blog";
 import { PRODUCTS } from "@/data/catalog";
@@ -105,7 +106,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
           <div className="richtext mt-6 !text-[16px]" dangerouslySetInnerHTML={{ __html: p.body }} />
 
-          <ShareButtons name={p.title} />
+          <ShareButtons name={p.title} url={`https://phonelaptops.co.ke/blog/${p.slug}`} />
 
           <div className="card mt-8 bg-ink-950 !border-ink-950 p-6 text-center text-white md:p-8">
             <p className="font-display text-xl font-extrabold">Ready to buy what you just read about?</p>
@@ -120,7 +121,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                 rel="noreferrer"
                 className="btn-whatsapp"
               >
-                <MessageCircle className="h-4 w-4" /> Ask an expert
+                <WhatsAppIcon className="h-4 w-4" /> Ask an expert
               </a>
             </div>
           </div>

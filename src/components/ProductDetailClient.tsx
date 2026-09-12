@@ -207,7 +207,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
             <a href={waUrl} target="_blank" rel="noreferrer" className="text-center text-xs font-semibold text-slate-500 hover:text-emerald-700">
               Ask about this product — we reply in minutes
             </a>
-            <ShareButtons name={product.name} price={finalPrice} />
+            <ShareButtons name={product.name} price={finalPrice} url={`https://phonelaptops.co.ke/${product.category}/${product.slug}`} />
           </div>
 
           <div className="card mt-5 p-4">
