@@ -26,29 +26,11 @@ async function main() {
   for (const p of PRODUCTS) {
     const category = await prisma.category.findUnique({ where: { slug: p.category } });
     const brand = await prisma.brand.findUnique({ where: { slug: p.brandSlug } });
+    // NOTE: update:{} is deliberate — this seed runs on every deploy and
+    // must never overwrite prices, stock or flags changed in /admin.
     await prisma.product.upsert({
       where: { slug: p.slug },
-      update: {
-        name: p.name,
-        tagline: p.tagline,
-        description: p.description,
-        price: p.price,
-        compareAtPrice: p.compareAtPrice ?? null,
-        condition: p.condition as never,
-        stockQty: p.stockQty,
-        stockStatus: p.stockStatus as never,
-        rating: p.rating,
-        reviewCount: p.reviewCount,
-        soldCount: p.soldCount,
-        isFeatured: !!p.isFeatured,
-        isDeal: !!p.isDeal,
-        isNew: !!p.isNew,
-        isBestSeller: !!p.isBestSeller,
-        seoTitle: p.seoTitle,
-        seoDescription: p.seoDescription,
-        categoryId: category?.id,
-        brandId: brand?.id,
-      },
+      update: {},
       create: {
         slug: p.slug,
         name: p.name,
@@ -76,19 +58,25 @@ async function main() {
     });
   }
 
-  // Delivery zones (configurable via admin in production)
+  // Delivery zones (configurable via admin in production).
+  // Stable ids + upsert so re-seeding on deploy never duplicates or
+  // overwrites admin-edited fees.
   const zones = [
-    { county: "Nairobi", town: "Nairobi CBD & environs", fee: 250, eta: "Same-day / Next-day" },
-    { county: "Nairobi", town: "Westlands / Kilimani / Karen", fee: 300, eta: "Same-day" },
-    { county: "Mombasa", town: "Mombasa", fee: 450, eta: "1–2 days" },
-    { county: "Kisumu", town: "Kisumu", fee: 450, eta: "1–2 days" },
-    { county: "Nakuru", town: "Nakuru", fee: 400, eta: "1–2 days" },
-    { county: "Uasin Gishu", town: "Eldoret", fee: 400, eta: "1–2 days" },
-    { county: "Kiambu", town: "Thika", fee: 350, eta: "Next-day" },
-    { county: "Other", town: "Other towns (G4S / Fargo)", fee: 500, eta: "2–3 days" },
+    { id: "zone-nairobi-cbd", county: "Nairobi", town: "Nairobi CBD & environs", fee: 250, eta: "Same-day / Next-day" },
+    { id: "zone-westlands", county: "Nairobi", town: "Westlands / Kilimani / Karen", fee: 300, eta: "Same-day" },
+    { id: "zone-mombasa", county: "Mombasa", town: "Mombasa", fee: 450, eta: "1–2 days" },
+    { id: "zone-kisumu", county: "Kisumu", town: "Kisumu", fee: 450, eta: "1–2 days" },
+    { id: "zone-nakuru", county: "Nakuru", town: "Nakuru", fee: 400, eta: "1–2 days" },
+    { id: "zone-eldoret", county: "Uasin Gishu", town: "Eldoret", fee: 400, eta: "1–2 days" },
+    { id: "zone-thika", county: "Kiambu", town: "Thika", fee: 350, eta: "Next-day" },
+    { id: "zone-other", county: "Other", town: "Other towns (G4S / Fargo)", fee: 500, eta: "2–3 days" },
   ];
   for (const z of zones) {
-    await prisma.deliveryZone.create({ data: z }).catch(() => null);
+    await prisma.deliveryZone.upsert({
+      where: { id: z.id },
+      update: {},
+      create: z,
+    }).catch(() => null);
   }
 
   console.log(`Seeded ${PRODUCTS.length} products, ${CATEGORIES.length} categories, ${BRANDS.length} brands.`);
@@ -161,9 +149,10 @@ async function main() {
       },
     ];
     for (const a of demoAds) {
+      // update:{} — ads are owned in /admin after first seed; redeploys must not clobber them.
       await prisma.adSlot.upsert({
         where: { id: `demo-${a.target}-${a.placement}-${a.format}` },
-        update: { ...a },
+        update: {},
         create: { id: `demo-${a.target}-${a.placement}-${a.format}`, ...a },
       });
     }
@@ -196,7 +185,7 @@ async function main() {
     for (const c of catAds) {
       await prisma.adSlot.upsert({
         where: { id: `cat-${c.slug}` },
-        update: { title: c.title, image: c.image, link: `/${c.slug}` },
+        update: {},
         create: {
           id: `cat-${c.slug}`,
           title: c.title,
@@ -219,9 +208,10 @@ async function main() {
     { code: "TECH10", type: "PERCENTAGE", value: 10, minSubtotal: 10000 },
     { code: "FLAT500", type: "FIXED", value: 500, minSubtotal: 5000 },
   ]) {
+    // update:{} — promos are owned in /admin (toggles, usage counts survive redeploys).
     await prisma.promoCode.upsert({
       where: { code: pc.code },
-      update: { type: pc.type as never, value: pc.value, minSubtotal: pc.minSubtotal, active: true },
+      update: {},
       create: { code: pc.code, type: pc.type as never, value: pc.value, minSubtotal: pc.minSubtotal, active: true },
     }).catch(() => null);
   }

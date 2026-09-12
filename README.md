@@ -17,7 +17,7 @@ npm run dev                 # http://localhost:3000
 ## Deploy (Vercel + Postgres)
 
 1. Set env vars: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `MPESA_*`, `NEXT_PUBLIC_WHATSAPP_NUMBER`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
-2. Run `prisma migrate deploy`, then seed once: `prisma db seed`.
+2. Every deploy auto-runs `prisma migrate deploy` + `prisma db seed` (see `vercel.json`). The seed is idempotent and never overwrites admin edits (prices, stock, flags, ads, promos, settings, passwords) — it only creates missing rows. If you set a custom Build Command in the Vercel dashboard it overrides `vercel.json`: either clear it or paste the same command there.
 3. Sign in at `/admin/login` with the seeded email + password, then change the password.
 
 **Admin console:** Overview, Products (+ `/new`, full `/[id]` edit), Orders (+ `/[orderNumber]` detail), Customers (+ `/[id]`), Promotions, Ads & Banners (+ `/[id]`), Reviews, Analytics, and Settings — site identity/contacts (header, footer, WhatsApp), password change, delivery zones. All `/admin/*` pages require login via middleware; mutation APIs verify the session server-side.
