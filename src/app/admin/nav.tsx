@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Package,
   FolderOpen,
   ShoppingCart,
@@ -17,7 +16,6 @@ import {
 import { cn } from "@/lib/utils";
 
 export const ADMIN_LINKS = [
-  { href: "/admin", label: "Overview", Icon: LayoutDashboard, exact: true },
   { href: "/admin/products", label: "Products", Icon: Package },
   { href: "/admin/categories", label: "Categories", Icon: FolderOpen },
   { href: "/admin/orders", label: "Orders", Icon: ShoppingCart },
@@ -40,8 +38,8 @@ export default function AdminNav() {
     <div className="border-b border-slate-200 bg-white">
       <div className="container-x py-2">
         <nav className="flex flex-wrap items-center gap-1">
-          {ADMIN_LINKS.map(({ href, label, Icon, exact }) => {
-            const active = exact ? path === href : path === href || path.startsWith(href + "/");
+          {ADMIN_LINKS.map(({ href, label, Icon }) => {
+            const active = path === href || path.startsWith(href + "/");
             return (
               <Link
                 key={href}
