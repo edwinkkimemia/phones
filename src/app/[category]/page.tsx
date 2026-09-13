@@ -6,6 +6,7 @@ import ShopClient from "@/components/ShopClient";
 import AdSlot from "@/components/AdSlot";
 import PageHero from "@/components/PageHero";
 import CrossSell, { CROSS_SELL, DEFAULT_CROSS_SELL } from "@/components/CrossSell";
+import ExploreCategories, { exploreProducts } from "@/components/ExploreCategories";
 import { PRODUCTS, CATEGORIES } from "@/data/catalog";
 import type { ProductT } from "@/types";
 import { getLiveCategory } from "@/lib/catalog-server";
@@ -160,6 +161,12 @@ export default async function CategoryPage({ params }: { params: { category: str
       <AdSlot placement="CATEGORY" target={params.category} />
       <ShopClient key={params.category} products={items} filters={{ brands, maxPrice }} title={cat?.name ? `${cat.name} — ${meta.title}` : meta.title} subtitle={meta.subtitle} />
       <CrossSell content={CROSS_SELL[params.category] ?? DEFAULT_CROSS_SELL} />
+      <ExploreCategories
+        currentSlug={params.category}
+        currentLabel={cat?.name ?? meta.title}
+        products={exploreProducts(PRODUCTS, params.category, params.category)}
+        categories={CATEGORIES}
+      />
     </>
   );
 }
@@ -191,6 +198,12 @@ function LiveCategoryPage({
       <AdSlot placement="CATEGORY" target={slug} />
       <ShopClient key={slug} products={items} filters={{ brands, maxPrice }} title={meta.title} subtitle={meta.subtitle} />
       <CrossSell content={CROSS_SELL[slug] ?? DEFAULT_CROSS_SELL} />
+      <ExploreCategories
+        currentSlug={slug}
+        currentLabel={meta.title}
+        products={exploreProducts(PRODUCTS, slug, slug)}
+        categories={CATEGORIES}
+      />
     </>
   );
 }
