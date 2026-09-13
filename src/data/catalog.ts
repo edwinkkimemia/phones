@@ -395,7 +395,10 @@ export const PRODUCTS: ProductT[] = [
     soldCount: 486,
     isDeal: true,
     isBestSeller: true,
-    images: [{ url: u("photo-1510557880182-3d4d3cba35a5"), alt: "iPhone 15" }],
+    images: [
+      { url: u("photo-1695048133142-1a20484d2569"), alt: "iPhone 15 front with Dynamic Island" },
+      { url: u("photo-1591337676887-a217a6970a8a"), alt: "iPhone 15 dual camera" },
+    ],
     specs: [
       { group: "General", key: "Storage", value: "128GB" },
       { group: "General", key: "Condition", value: "Brand New (Sealed)" },
