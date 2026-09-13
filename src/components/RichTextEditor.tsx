@@ -18,7 +18,10 @@ export default function RichTextEditor({
   disabled?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const lastExternal = useRef(value);
+  // null = never synced: guarantees the first run populates the editor with
+  // the loaded value (previously the div stayed empty on edit pages because
+  // the ref was initialised to `value`, so the sync was skipped on mount).
+  const lastExternal = useRef<string | null>(null);
 
   // Sync external value (e.g. loaded product) without clobbering typing.
   useEffect(() => {

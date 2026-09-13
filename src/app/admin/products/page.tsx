@@ -89,18 +89,17 @@ export default function AdminProducts() {
                   <p className="text-xs text-slate-500">{brandName(r)} • {r.slug ?? r.id}</p>
                 </td>
                 <td className="p-3">
-                  <input
-                    type="number" defaultValue={r.price} disabled={source !== "db"}
-                    onBlur={(e) => { const v = Number(e.target.value); if (v !== r.price && v > 0) mutate("PATCH", { id: r.id, price: v }); }}
-                    className="input !w-28 !py-1.5 text-xs font-bold"
-                  />
+                  <p className="text-xs font-bold">{kes(r.price)}</p>
+                  {typeof r.compareAtPrice === "number" && r.compareAtPrice > r.price && (
+                    <p className="text-[11px] text-slate-400 line-through">{kes(r.compareAtPrice)}</p>
+                  )}
+                  <Link href={`/admin/products/${r.id}`} className="text-[11px] font-bold text-brand-700 hover:underline">
+                    Edit in product →
+                  </Link>
                 </td>
                 <td className="p-3">
-                  <input
-                    type="number" defaultValue={r.stockQty ?? 0} disabled={source !== "db"}
-                    onBlur={(e) => { const v = Number(e.target.value); if (v !== r.stockQty) mutate("PATCH", { id: r.id, stockQty: v }); }}
-                    className="input !w-20 !py-1.5 text-xs font-bold"
-                  />
+                  <p className="text-xs font-bold">{r.stockQty ?? "—"}</p>
+                  {r.stockStatus && <p className="text-[11px] text-slate-500">{r.stockStatus}</p>}
                 </td>
                 <td className="p-3">
                   <div className="flex gap-1">
@@ -129,7 +128,7 @@ export default function AdminProducts() {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-[11px] text-slate-400">Tip: click out of a price or stock field to save. Open any product for full editing — gallery, specs, description and flags.</p>
+      <p className="mt-2 text-[11px] text-slate-400">Price and stock are edited inside the single product page only. Open any product for full editing — price, stock, gallery, specs, description and flags.</p>
     </div>
   );
 }
