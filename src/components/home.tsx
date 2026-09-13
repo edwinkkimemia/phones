@@ -1,85 +1,158 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Truck, MessageCircle, CreditCard, ShieldCheck, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, CreditCard, Flame, MapPin, MessageCircle, ShieldCheck, Star, Truck } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons";
 import { pickDaily } from "@/lib/rotation";
-import { HeroFeatures, ShuffleGrid } from "@/components/RotatingShowcase";
-import { PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
+import { HeroCarousel, ShuffleGrid } from "@/components/RotatingShowcase";
+import { CATEGORIES, PRODUCTS, BRANDS, REVIEWS, deals, bestSellers, newArrivals } from "@/data/catalog";
+import { WHATSAPP_NUMBER, kes, savings, whatsappLink } from "@/lib/utils";
 import { getCategories } from "@/lib/catalog-server";
 import ProductCard from "@/components/ProductCard";
+
+// Saruk-style category shortcuts inside the hero (deep-links above the fold).
+const heroCategories = ["laptops", "iphones", "phones", "accessories", "storage", "wearables", "tablets", "gaming"]
+  .map((slug) => CATEGORIES.find((c) => c.slug === slug))
+  .filter((c): c is (typeof CATEGORIES)[number] => Boolean(c));
 
 // Curated order for the hero logo ticker (all have files in public/brand).
 const heroBrands = ["HP", "Apple", "Samsung", "Lenovo", "Dell", "ASUS", "Xiaomi", "Tecno", "Anker", "JBL", "Oraimo", "Infinix"];
 
 export function Hero() {
-  // Server picks for first paint; HeroFeatures reshuffles on every load.
-  const featuredPool = PRODUCTS.filter((p) => p.isFeatured);
-  const serverPicks = pickDaily(featuredPool, 2, "hero");
+  // Deterministic daily merchandising: in-stock featured first, deals fill up
+  // to 4 slides. Same order all day (no surprise reshuffles), fresh tomorrow.
+  const inStock = (p: (typeof PRODUCTS)[number]) => p.stockStatus !== "OUT_OF_STOCK";
+  const featuredPool = PRODUCTS.filter((p) => p.isFeatured && inStock(p));
+  const dealFill = deals().filter((p) => inStock(p) && !featuredPool.some((f) => f.id === p.id));
+  const slides = pickDaily([...featuredPool, ...dealFill], 4, "hero-v2");
+
+  // Live price anchors so the hero always names a real offer (Saruk tactic,
+  // kept as DOM text for SEO instead of baked-in banner images).
+  const liveDeals = deals().filter(inStock);
+  const topDeal = liveDeals.sort((a, b) => (savings(b.price, b.compareAtPrice) ?? -1) - (savings(a.price, a.compareAtPrice) ?? -1))[0];
+  const topSave = topDeal ? savings(topDeal.price, topDeal.compareAtPrice) : null;
+  const floor = (cat: string) => {
+    const ps = PRODUCTS.filter((p) => p.category === cat && inStock(p));
+    return ps.length ? Math.min(...ps.map((p) => p.price)) : null;
+  };
+  const laptopFloor = floor("laptops");
+  const iphoneFloor = floor("iphones");
+
   return (
     <section className="relative overflow-hidden bg-ink-950 text-white">
-      <Image
-        src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2000&q=80"
-        alt=""
-        aria-hidden="true"
-        fill
-        priority
-        className="object-cover opacity-50"
-      />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/60 to-ink-950/20" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/80 via-transparent to-ink-950/30" />
+      {/* Product-led dark backdrop (no generic stock photo): gradients only. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-900/40" />
       <div
-        className="pointer-events-none absolute inset-0 opacity-60"
+        className="pointer-events-none absolute inset-0 opacity-70"
         style={{
           background:
-            "radial-gradient(700px 320px at 15% 10%, rgba(59,99,246,.35), transparent), radial-gradient(600px 300px at 85% 20%, rgba(0,230,118,.14), transparent), radial-gradient(800px 400px at 50% 110%, rgba(59,99,246,.22), transparent)",
+            "radial-gradient(700px 320px at 12% 8%, rgba(59,99,246,.35), transparent), radial-gradient(600px 300px at 88% 18%, rgba(0,213,255,.14), transparent), radial-gradient(800px 400px at 50% 115%, rgba(59,99,246,.22), transparent)",
         }}
       />
-      <div className="container-x relative grid gap-10 py-12 md:grid-cols-2 md:items-center md:py-20">
-        <div>
+      <div className="container-x relative grid gap-8 py-10 md:py-14 lg:grid-cols-12 lg:items-center">
+        <div className="lg:col-span-5">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            Nairobi • Mombasa • Kisumu • Countrywide
+            Nairobi • Same-day delivery
           </p>
-          <h1 className="font-display mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            Upgrade Your <span className="bg-gradient-to-r from-brand-400 via-accent to-brand-400 bg-clip-text text-transparent">Tech.</span>
+          <h1 className="font-display mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
+            Laptops &amp; iPhones in Kenya.{" "}
+            <span className="bg-gradient-to-r from-brand-400 via-accent to-brand-400 bg-clip-text text-transparent">
+              Genuine stock. Fair prices.
+            </span>
           </h1>
           <p className="mt-4 max-w-md text-[15px] leading-relaxed text-slate-300">
-            Latest laptops, iPhones, smartphones and accessories at competitive
-            Kenyan prices. Genuine stock, M-Pesa checkout, fast delivery.
+            HP, Lenovo, Samsung, Apple &amp; more — sealed stock with receipts,
+            M-Pesa checkout, 1-year warranty and fast countrywide delivery.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/deals" className="btn-primary !bg-brand-500 !px-7 !py-3.5 !text-[15px] hover:!bg-brand-400">
-              Shop Now <ArrowRight className="h-4 w-4" />
+          {(topDeal && topSave !== null) || laptopFloor !== null ? (
+            <p className="mt-3 flex max-w-md flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-amber-200">
+              <Flame className="h-4 w-4 shrink-0 text-amber-400" />
+              {topDeal && topSave !== null && (
+                <span>
+                  Today: SAVE {kes(topSave)} on{" "}
+                  <Link href={`/${topDeal.category}/${topDeal.slug}`} className="underline hover:text-amber-100">
+                    {topDeal.brand} {topDeal.categoryLabel}
+                  </Link>
+                </span>
+              )}
+              {laptopFloor !== null && <span className="text-slate-400">• Laptops from {kes(laptopFloor)}</span>}
+              {iphoneFloor !== null && <span className="text-slate-400">• iPhones from {kes(iphoneFloor)}</span>}
+            </p>
+          ) : null}
+          <div className="mt-6 flex flex-wrap gap-2.5">
+            <Link href="/laptops" className="btn-primary !bg-brand-500 !px-6 !py-3 !text-sm hover:!bg-brand-400">
+              Shop Laptops <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/iphones"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/10"
+            >
+              Shop iPhones
             </Link>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "254715135141"}?text=${encodeURIComponent("Hello PhoneLaptops! I need help choosing a laptop/phone.")}`}
+              href={whatsappLink("Hello PhoneLaptops! I need help choosing a laptop/phone.", WHATSAPP_NUMBER)}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-white/5 hover:text-white"
             >
               <WhatsAppIcon className="h-4 w-4 text-accent" /> Talk to an Expert
             </a>
           </div>
-          <div className="mt-8 grid max-w-md grid-cols-2 gap-2.5 text-xs font-semibold text-slate-300 sm:grid-cols-4">
+          <div className="mt-6 grid max-w-md grid-cols-2 gap-2 text-xs">
             {[
-              { icon: BadgeCheck, label: "Authentic Products" },
-              { icon: CreditCard, label: "M-Pesa Payments" },
-              { icon: Truck, label: "Fast Delivery" },
-              { icon: ShieldCheck, label: "Expert Support" },
+              { icon: Truck, title: "Same-day Nairobi", sub: "Order before 4pm", href: "/delivery" },
+              { icon: CreditCard, title: "M-Pesa & COD", sub: "Pay your way", href: "/delivery" },
+              { icon: ShieldCheck, title: "1-Year Warranty", sub: "On every product", href: "/warranty" },
+              { icon: MapPin, title: "Nairobi Pickup", sub: "Kimathi St store", href: "/contact" },
             ].map((t) => (
-              <span key={t.label} className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2">
-                <t.icon className="h-4 w-4 shrink-0 text-accent" /> {t.label}
-              </span>
+              <Link
+                key={t.title}
+                href={t.href}
+                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 transition hover:border-white/25 hover:bg-white/10"
+              >
+                <t.icon className="h-4 w-4 shrink-0 text-accent" />
+                <span>
+                  <span className="block font-bold text-white">{t.title}</span>
+                  <span className="block text-[11px] font-medium text-slate-400">{t.sub}</span>
+                </span>
+              </Link>
             ))}
           </div>
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-300">
+            <span className="flex gap-0.5 text-amber-400" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-3.5 w-3.5 fill-current" />
+              ))}
+            </span>
+            <span className="font-extrabold text-white">4.9/5</span> • 12,400+ verified reviews across Kenya
+          </p>
         </div>
 
-        <div className="relative">
-          <HeroFeatures pool={featuredPool} initial={serverPicks} />
-          <div className="mt-3 rounded-2xl border border-accent/30 bg-accent/10 p-3">
-            <p className="flex items-center gap-1 text-xs font-extrabold text-accent"><Star className="h-3.5 w-3.5 fill-current" /> 4.9/5</p>
-            <p className="mt-1 text-[11px] leading-snug text-slate-300">12,400+ verified reviews from buyers across Kenya</p>
-          </div>
+        <div className="relative lg:col-span-7">
+          <HeroCarousel slides={slides} />
+        </div>
+      </div>
+      {/* Category shortcuts — Saruk's high-converting strip, kept in-hero. */}
+      <div className="relative border-t border-white/10 bg-white/[.03]">
+        <div className="container-x flex items-center gap-3 overflow-x-auto py-3 no-scrollbar">
+          <span className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+            Shop by category
+          </span>
+          {heroCategories.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/${c.slug}`}
+              className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1 pl-1 pr-3 transition hover:border-white/25 hover:bg-white/10"
+            >
+              <span className="relative block h-7 w-7 overflow-hidden rounded-full bg-ink-800">
+                <Image src={c.image} alt="" fill sizes="28px" className="object-cover" loading="lazy" />
+              </span>
+              <span className="text-xs font-bold text-white">{c.name}</span>
+            </Link>
+          ))}
+          <Link href="/deals" className="flex shrink-0 items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-red-500">
+            🔥 Deals <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
       <div className="relative border-t border-white/10 bg-white/[.03]">

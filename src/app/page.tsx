@@ -10,6 +10,7 @@ import {
   NewsletterCTA,
 } from "@/components/home";
 import AdSlot from "@/components/AdSlot";
+import Link from "next/link";
 import { PRODUCTS } from "@/data/catalog";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { shuffled, rotate } from "@/lib/rotation";
@@ -32,11 +33,11 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd()) }} />
       <Hero />
       <div className="border-b border-slate-100 bg-white">
-        <div className="container-x grid grid-cols-2 gap-2 py-3 text-center text-[11px] font-bold text-slate-600 sm:grid-cols-4">
-          <span>✓ Authentic Products</span>
-          <span>✓ M-Pesa Payments</span>
-          <span>✓ Fast Delivery</span>
-          <span>✓ Expert Support</span>
+        <div className="container-x flex items-center justify-center gap-x-5 gap-y-1 overflow-x-auto py-3 text-center text-[11px] font-bold text-slate-600 no-scrollbar sm:grid sm:grid-cols-4">
+          <Link href="/delivery" className="shrink-0 hover:text-brand-700">✓ Same-day Nairobi delivery</Link>
+          <Link href="/delivery" className="shrink-0 hover:text-brand-700">✓ M-Pesa &amp; pay on delivery</Link>
+          <Link href="/warranty" className="shrink-0 hover:text-brand-700">✓ 1-year warranty included</Link>
+          <Link href="/contact" className="shrink-0 hover:text-brand-700">✓ Nairobi pickup available</Link>
         </div>
       </div>
       <AdSlot placement="HOMEPAGE" target="below-hero" />
