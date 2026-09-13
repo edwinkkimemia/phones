@@ -93,9 +93,6 @@ export default function AdminProducts() {
                   {typeof r.compareAtPrice === "number" && r.compareAtPrice > r.price && (
                     <p className="text-[11px] text-slate-400 line-through">{kes(r.compareAtPrice)}</p>
                   )}
-                  <Link href={`/admin/products/${r.id}`} className="text-[11px] font-bold text-brand-700 hover:underline">
-                    Edit in product →
-                  </Link>
                 </td>
                 <td className="p-3">
                   <p className="text-xs font-bold">{r.stockQty ?? "—"}</p>

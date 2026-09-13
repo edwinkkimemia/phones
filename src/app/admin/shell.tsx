@@ -1,9 +1,9 @@
 "use client";
 import { usePathname } from "next/navigation";
-import AdminNav from "./nav";
 import AdminProviders from "./providers";
 
-// Login page renders standalone (no sidebar); everything else gets the console shell.
+// Login page renders standalone; everything else gets a full-width console
+// shell (section navbar lives in the admin layout, no sidebar).
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   if (path === "/admin/login") {
@@ -14,10 +14,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     );
   }
   return (
-    <div className="container-x grid gap-6 py-6 lg:grid-cols-[230px_1fr]">
-      <AdminProviders>
-        <AdminNav />
-      </AdminProviders>
+    <div className="container-x py-6">
       <div className="min-w-0">
         <AdminProviders>{children}</AdminProviders>
       </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Store } from "lucide-react";
 import AdminShell from "./shell";
+import AdminNav from "./nav";
 
 export const metadata = { title: "Admin Dashboard", robots: { index: false, follow: false } };
 
@@ -25,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
       </div>
+      <AdminNav />
       <AdminShell>{children}</AdminShell>
     </div>
   );

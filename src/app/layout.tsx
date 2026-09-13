@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { WhatsAppFloat, MobileNav } from "@/components/chrome";
-import { Toasts } from "@/components/toast";
-import PromoPopup from "@/components/PromoPopup";
-import AiAssistant from "@/components/AiAssistant";
+import SiteChrome from "@/components/SiteChrome";
 import StoreProviders from "@/components/Providers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { getCategories } from "@/lib/catalog-server";
@@ -70,19 +65,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen pb-16 md:pb-0">
         <StoreProviders>
-          <Header
-            phone={settings.phone_display}
-            email={settings.email}
-            announcement={settings.announcement}
-            categories={navCats}
-          />
-          <main className="min-h-[60vh]">{children}</main>
-          <Footer settings={settings} categories={navCats} />
-          <WhatsAppFloat phone={settings.whatsapp_number} />
-          <MobileNav />
-          <AiAssistant />
-          <PromoPopup />
-          <Toasts />
+          <SiteChrome settings={settings} navCats={navCats}>
+            {children}
+          </SiteChrome>
         </StoreProviders>
       </body>
     </html>
