@@ -38,54 +38,45 @@ export function Hero() {
   const iphoneFloor = floor("iphones");
 
   return (
-    <section className="relative overflow-hidden bg-ink-950 text-white">
-      {/* Product-led dark backdrop (no generic stock photo): gradients only. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-900/40" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-70"
-        style={{
-          background:
-            "radial-gradient(700px 320px at 12% 8%, rgba(59,99,246,.35), transparent), radial-gradient(600px 300px at 88% 18%, rgba(0,213,255,.14), transparent), radial-gradient(800px 400px at 50% 115%, rgba(59,99,246,.22), transparent)",
-        }}
-      />
+    <section className="relative overflow-hidden border-b border-slate-200 bg-slate-50 text-slate-900">
       <div className="container-x relative grid gap-8 py-10 md:py-14 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-5">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+          <p className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-800 shadow-sm">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-mpesa" />
             Nairobi • Same-day delivery
           </p>
           <h1 className="font-display mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
             Laptops &amp; iPhones in Kenya.{" "}
-            <span className="bg-gradient-to-r from-brand-400 via-accent to-brand-400 bg-clip-text text-transparent">
+            <span className="text-brand-700">
               Genuine stock. Fair prices.
             </span>
           </h1>
-          <p className="mt-4 max-w-md text-[15px] leading-relaxed text-slate-300">
+          <p className="mt-4 max-w-md text-[15px] leading-relaxed text-slate-600">
             HP, Lenovo, Samsung, Apple &amp; more — sealed stock with receipts,
             M-Pesa checkout, 1-year warranty and fast countrywide delivery.
           </p>
           {(topDeal && topSave !== null) || laptopFloor !== null ? (
-            <p className="mt-3 flex max-w-md flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-amber-200">
-              <Flame className="h-4 w-4 shrink-0 text-amber-400" />
+            <p className="mt-3 flex max-w-md flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-semibold text-amber-700">
+              <Flame className="h-4 w-4 shrink-0 text-amber-500" />
               {topDeal && topSave !== null && (
                 <span>
                   Today: SAVE {kes(topSave)} on{" "}
-                  <Link href={`/${topDeal.category}/${topDeal.slug}`} className="underline hover:text-amber-100">
+                  <Link href={`/${topDeal.category}/${topDeal.slug}`} className="underline hover:text-amber-800">
                     {topDeal.brand} {topDeal.categoryLabel}
                   </Link>
                 </span>
               )}
-              {laptopFloor !== null && <span className="text-slate-400">• Laptops from {kes(laptopFloor)}</span>}
-              {iphoneFloor !== null && <span className="text-slate-400">• iPhones from {kes(iphoneFloor)}</span>}
+              {laptopFloor !== null && <span className="text-slate-500">• Laptops from {kes(laptopFloor)}</span>}
+              {iphoneFloor !== null && <span className="text-slate-500">• iPhones from {kes(iphoneFloor)}</span>}
             </p>
           ) : null}
           <div className="mt-6 flex flex-wrap gap-2.5">
-            <Link href="/laptops" className="btn-primary !bg-brand-500 !px-6 !py-3 !text-sm hover:!bg-brand-400">
+            <Link href="/laptops" className="btn-primary !bg-brand-600 !px-6 !py-3 !text-sm hover:!bg-brand-500">
               Shop Laptops <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/iphones"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/10"
+              className="btn-ghost !py-3 text-sm"
             >
               Shop iPhones
             </Link>
@@ -93,9 +84,9 @@ export function Hero() {
               href={whatsappLink("Hello PhoneLaptops! I need help choosing a laptop/phone.", WHATSAPP_NUMBER)}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-white/5 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
             >
-              <WhatsAppIcon className="h-4 w-4 text-accent" /> Talk to an Expert
+              <WhatsAppIcon className="h-4 w-4 text-mpesa" /> Talk to an Expert
             </a>
           </div>
           <div className="mt-6 grid max-w-md grid-cols-2 gap-2 text-xs">
@@ -108,23 +99,23 @@ export function Hero() {
               <Link
                 key={t.title}
                 href={t.href}
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 transition hover:border-white/25 hover:bg-white/10"
+                className="card flex items-center gap-2 px-2.5 py-2 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-pop"
               >
-                <t.icon className="h-4 w-4 shrink-0 text-accent" />
+                <t.icon className="h-4 w-4 shrink-0 text-brand-600" />
                 <span>
-                  <span className="block font-bold text-white">{t.title}</span>
-                  <span className="block text-[11px] font-medium text-slate-400">{t.sub}</span>
+                  <span className="block font-bold text-slate-900">{t.title}</span>
+                  <span className="block text-[11px] font-medium text-slate-500">{t.sub}</span>
                 </span>
               </Link>
             ))}
           </div>
-          <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-300">
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-600">
             <span className="flex gap-0.5 text-amber-400" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-3.5 w-3.5 fill-current" />
               ))}
             </span>
-            <span className="font-extrabold text-white">4.9/5</span> • 12,400+ verified reviews across Kenya
+            <span className="font-extrabold text-slate-900">4.9/5</span> • 12,400+ verified reviews across Kenya
           </p>
         </div>
 
@@ -133,21 +124,21 @@ export function Hero() {
         </div>
       </div>
       {/* Category shortcuts — Saruk's high-converting strip, kept in-hero. */}
-      <div className="relative border-t border-white/10 bg-white/[.03]">
+      <div className="relative border-t border-slate-200 bg-slate-50/80">
         <div className="container-x flex items-center gap-3 overflow-x-auto py-3 no-scrollbar">
-          <span className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+          <span className="shrink-0 text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
             Shop by category
           </span>
           {heroCategories.map((c) => (
             <Link
               key={c.slug}
               href={`/${c.slug}`}
-              className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1 pl-1 pr-3 transition hover:border-white/25 hover:bg-white/10"
+              className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 transition hover:border-brand-300 hover:shadow-pop"
             >
-              <span className="relative block h-7 w-7 overflow-hidden rounded-full bg-ink-800">
+              <span className="relative block h-7 w-7 overflow-hidden rounded-full bg-slate-100">
                 <Image src={c.image} alt="" fill sizes="28px" className="object-cover" loading="lazy" />
               </span>
-              <span className="text-xs font-bold text-white">{c.name}</span>
+              <span className="text-xs font-bold text-slate-800">{c.name}</span>
             </Link>
           ))}
           <Link href="/deals" className="flex shrink-0 items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-red-500">
@@ -155,14 +146,14 @@ export function Hero() {
           </Link>
         </div>
       </div>
-      <div className="relative border-t border-white/10 bg-white/[.03]">
+      <div className="relative border-t border-slate-200 bg-white">
         <div className="overflow-hidden py-3 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
           <div className="animate-marquee flex w-max items-center" style={{ animationDuration: "26s" }}>
             {[...heroBrands, ...heroBrands].map((b, i) => (
               <span
                 key={`${b}-${i}`}
                 aria-hidden={i >= heroBrands.length}
-                className="mx-1.5 flex h-9 w-32 shrink-0 items-center justify-center rounded-lg bg-white/95 p-1"
+                className="mx-1.5 flex h-9 w-32 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white p-1 shadow-sm"
               >
                 <span className="relative block h-7 w-full">
                   <Image

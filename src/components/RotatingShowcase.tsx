@@ -81,8 +81,8 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
       onBlur={() => setPaused(false)}
     >
       {/* Main slide — real product photo, price + scarcity, deep-link CTA. */}
-      <div className="card col-span-5 overflow-hidden !border-white/10 !bg-white/5 p-3 backdrop-blur sm:col-span-3">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-ink-900">
+      <div className="card col-span-5 overflow-hidden p-3 sm:col-span-3">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100">
           <Image
             key={active.id}
             src={active.images[0].url}
@@ -131,16 +131,16 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
         </div>
 
         <div aria-live="polite">
-          <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-brand-300">
+          <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-brand-600">
             {active.brand} • {active.categoryLabel}
           </p>
-          <p className="mt-0.5 line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-white">
-            <Link href={`/${active.category}/${active.slug}`} className="hover:underline">
+          <p className="mt-0.5 line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-slate-900">
+            <Link href={`/${active.category}/${active.slug}`} className="hover:text-brand-700 hover:underline">
               {active.name}
             </Link>
           </p>
-          <Price price={active.price} compareAt={active.compareAtPrice} size="sm" className="mt-1 [&>span:first-child]:!text-white" />
-          <p className={cn("mt-1.5 text-[11px] font-bold", low ? "text-amber-300" : "text-emerald-300")}>
+          <Price price={active.price} compareAt={active.compareAtPrice} size="sm" className="mt-1" />
+          <p className={cn("mt-1.5 text-[11px] font-bold", out ? "text-red-600" : low ? "text-amber-700" : "text-emerald-700")}>
             {out ? "Out of stock — ask for restock date" : low ? `Only ${active.stockQty} left — order today` : "In stock • Same-day Nairobi dispatch"}
           </p>
           <div className="mt-2.5 flex gap-2">
@@ -152,7 +152,7 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`Ask about ${active.name} on WhatsApp`}
-              className="grid w-11 place-items-center rounded-xl border border-white/20 bg-white/5 text-white transition hover:bg-white/10"
+              className="btn-ghost !px-0 w-11"
             >
               <MessageCircle className="h-4 w-4" />
             </a>
@@ -170,7 +170,7 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
                 onClick={() => go(i)}
                 className={cn(
                   "h-1.5 rounded-full transition-all",
-                  i === index ? "w-6 bg-accent" : "w-1.5 bg-white/25 hover:bg-white/50"
+                  i === index ? "w-6 bg-brand-600" : "w-1.5 bg-slate-300 hover:bg-slate-400"
                 )}
               />
             ))}
@@ -183,12 +183,12 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
         {dealOfDay && (
           <Link
             href={`/${dealOfDay.category}/${dealOfDay.slug}`}
-            className="card group flex-1 overflow-hidden !border-amber-300/30 !bg-gradient-to-br !from-amber-400/15 !to-transparent p-3 backdrop-blur transition hover:!border-amber-300/60"
+            className="card group flex-1 overflow-hidden !border-amber-300 !bg-amber-50 p-3 transition hover:shadow-pop"
           >
-            <p className="flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
+            <p className="flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-amber-700">
               <Flame className="h-3.5 w-3.5" /> Deal of the day
             </p>
-            <div className="relative mt-2 aspect-[16/9] overflow-hidden rounded-lg bg-ink-900">
+            <div className="relative mt-2 aspect-[16/9] overflow-hidden rounded-lg bg-slate-100">
               <Image
                 src={dealOfDay.images[0].url}
                 alt={dealOfDay.images[0].alt || dealOfDay.name}
@@ -203,28 +203,28 @@ export function HeroCarousel({ slides }: { slides: ProductT[] }) {
                 </span>
               )}
             </div>
-            <p className="mt-2 line-clamp-2 text-xs font-bold leading-snug text-white">{dealOfDay.name}</p>
-            <p className="mt-1 text-sm font-extrabold text-white">{kes(dealOfDay.price)}</p>
-            <span className="mt-2 block rounded-lg bg-amber-400 py-2 text-center text-[11px] font-extrabold text-ink-950 transition group-hover:bg-amber-300">
+            <p className="mt-2 line-clamp-2 text-xs font-bold leading-snug text-slate-900">{dealOfDay.name}</p>
+            <p className="mt-1 text-sm font-extrabold text-slate-900">{kes(dealOfDay.price)}</p>
+            <span className="mt-2 block rounded-lg bg-ink-950 py-2 text-center text-[11px] font-extrabold text-white transition group-hover:bg-ink-800">
               Grab this deal
             </span>
           </Link>
         )}
-        <div className="card hidden flex-1 flex-col justify-center gap-2 !border-white/10 !bg-white/5 p-3 backdrop-blur sm:flex">
-          <p className="flex items-center gap-1.5 text-xs font-extrabold text-white">
-            <Truck className="h-4 w-4 text-accent" /> Same-day Nairobi
+        <div className="card hidden flex-1 flex-col justify-center gap-2 p-3 sm:flex">
+          <p className="flex items-center gap-1.5 text-xs font-extrabold text-slate-900">
+            <Truck className="h-4 w-4 text-brand-600" /> Same-day Nairobi
           </p>
-          <p className="text-[11px] leading-snug text-slate-300">Order before 4pm. M-Pesa or pay on delivery.</p>
+          <p className="text-[11px] leading-snug text-slate-500">Order before 4pm. M-Pesa or pay on delivery.</p>
           <div className="flex gap-2">
-            <Link href="/delivery" className="flex-1 rounded-lg bg-white/10 py-2 text-center text-[11px] font-bold text-white hover:bg-white/20">
+            <Link href="/delivery" className="flex-1 rounded-lg bg-slate-100 py-2 text-center text-[11px] font-bold text-slate-800 hover:bg-slate-200">
               Delivery info
             </Link>
-            <Link href="/track-order" className="flex-1 rounded-lg bg-white/10 py-2 text-center text-[11px] font-bold text-white hover:bg-white/20">
+            <Link href="/track-order" className="flex-1 rounded-lg bg-slate-100 py-2 text-center text-[11px] font-bold text-slate-800 hover:bg-slate-200">
               Track order
             </Link>
           </div>
-          <p className="flex items-center gap-1.5 text-[11px] text-slate-400">
-            <PackageCheck className="h-3.5 w-3.5 text-emerald-300" /> 1-yr warranty • <Link href="/warranty" className="font-bold text-slate-200 underline">Learn more</Link>
+          <p className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <PackageCheck className="h-3.5 w-3.5 text-emerald-600" /> 1-yr warranty • <Link href="/warranty" className="font-bold text-brand-700 underline">Learn more</Link>
           </p>
         </div>
       </div>
