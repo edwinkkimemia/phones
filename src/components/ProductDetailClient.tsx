@@ -20,7 +20,7 @@ import { WhatsAppIcon } from "@/components/icons";
 import AdSlot from "@/components/AdSlot";
 import ShareButtons from "@/components/ShareButtons";
 import ProductCard from "@/components/ProductCard";
-import { PRODUCTS, REVIEWS } from "@/data/catalog";
+import { CATEGORIES, PRODUCTS, REVIEWS } from "@/data/catalog";
 import { useCart, useWishlist } from "@/lib/store";
 import { toast } from "@/components/toast";
 import { kes, productWhatsappMessage, whatsappLink } from "@/lib/utils";
@@ -62,6 +62,23 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
   const mainSrc = current?.url ?? "/logo.png";
   const markFailed = (url: string) => setFailed((f) => (f[url] ? f : { ...f, [url]: true }));
   const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  // Cross-category discovery: top sellers from *other* categories, rotated
+  // per product so every page surfaces something different but stable.
+  const explore = useMemo(() => {
+    const pool = PRODUCTS.filter(
+      (p) => p.category !== product.category && p.id !== product.id && p.stockStatus !== "OUT_OF_STOCK"
+    );
+    const sorted = [...pool].sort((a, b) => b.soldCount - a.soldCount);
+    if (sorted.length === 0) return sorted;
+    let h = 0;
+    for (let i = 0; i < product.id.length; i++) h = (Math.imul(h, 31) + product.id.charCodeAt(i)) | 0;
+    const off = Math.abs(h) % sorted.length;
+    return [...sorted.slice(off), ...sorted.slice(0, off)].slice(0, 4);
+  }, [product.id, product.category]);
+  const otherCats = useMemo(
+    () => CATEGORIES.filter((c) => c.slug !== product.category).slice(0, 6),
+    [product.category]
+  );
   const waUrl = whatsappLink(
     productWhatsappMessage(product.name, finalPrice, `https://phonelaptops.co.ke/${product.category}/${product.slug}`)
   );
@@ -308,6 +325,30 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
         {related.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
+      </div>
+
+      <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 p-5 md:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">Beyond {product.categoryLabel}</p>
+        <h2 className="section-title mt-1 !text-xl">Explore other categories</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Top-rated picks from across the store — pairs well with your {product.categoryLabel.toLowerCase()} order in one delivery.
+        </p>
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {otherCats.map((c) => (
+            <Link
+              key={c.slug}
+              href={`/${c.slug}`}
+              className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-700"
+            >
+              {c.name}
+            </Link>
+          ))}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {explore.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
       </div>
     </div>
     </>
