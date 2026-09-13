@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -11,9 +10,6 @@ import {
   Tag,
   Megaphone,
   Star,
-  BarChart3,
-  Settings,
-  LogOut,
   Send,
   Newspaper,
   BookOpen,
@@ -32,19 +28,18 @@ export const ADMIN_LINKS = [
   { href: "/admin/reviews", label: "Reviews", Icon: Star },
   { href: "/admin/blog", label: "Blog", Icon: Newspaper },
   { href: "/admin/guides", label: "Guides", Icon: BookOpen },
-  { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
-  { href: "/admin/settings", label: "Settings", Icon: Settings },
 ];
 
-// Horizontal section navbar below the Admin Console bar (no sidebar).
-// Hidden on the login page.
+// Horizontal section navbar below the Admin Console bar (no sidebar, no
+// scroll — links wrap). Analytics, Settings and Sign out live in the top
+// bar next to "View store". Hidden on the login page.
 export default function AdminNav() {
   const path = usePathname();
   if (path === "/admin/login") return null;
   return (
     <div className="border-b border-slate-200 bg-white">
-      <div className="container-x flex items-center gap-1 overflow-x-auto py-2 no-scrollbar">
-        <nav className="flex items-center gap-1">
+      <div className="container-x py-2">
+        <nav className="flex flex-wrap items-center gap-1">
           {ADMIN_LINKS.map(({ href, label, Icon, exact }) => {
             const active = exact ? path === href : path === href || path.startsWith(href + "/");
             return (
@@ -61,12 +56,6 @@ export default function AdminNav() {
             );
           })}
         </nav>
-        <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
-          className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-bold text-slate-500 hover:bg-red-50 hover:text-red-600"
-        >
-          <LogOut className="h-4 w-4" /> Sign out
-        </button>
       </div>
     </div>
   );
