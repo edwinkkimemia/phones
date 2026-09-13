@@ -27,7 +27,8 @@ import { kes, productWhatsappMessage, whatsappLink } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 export default function ProductDetailClient({ product }: { product: ProductT }) {
-  const [img, setImg] = useState(0);
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
   const [qty, setQty] = useState(1);
   const [liveReviews, setLiveReviews] = useState<{ name: string; rating: number; title?: string | null; body: string }[] | null>(null);
   const [selected, setSelected] = useState<Record<string, string>>(() =>
@@ -51,6 +52,15 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
   }, [product.variants, selected]);
 
   const finalPrice = product.price + delta;
+  // Gallery skips dead images automatically: a failed URL is dropped and the
+  // next working image takes over, so one bad creative never blanks the page.
+  const liveImages = useMemo(
+    () => (product.images ?? []).filter((im) => im?.url && !failed[im.url]),
+    [product.images, failed]
+  );
+  const current = liveImages.find((im) => im.url === imgUrl) ?? liveImages[0];
+  const mainSrc = current?.url ?? "/logo.png";
+  const markFailed = (url: string) => setFailed((f) => (f[url] ? f : { ...f, [url]: true }));
   const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
   const waUrl = whatsappLink(
     productWhatsappMessage(product.name, finalPrice, `https://phonelaptops.co.ke/${product.category}/${product.slug}`)
@@ -76,7 +86,7 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
       slug: product.slug,
       name: product.name,
       brand: product.brand,
-      image: product.images[0]?.url ?? "",
+      image: liveImages[0]?.url ?? product.images[0]?.url ?? "",
       price: finalPrice,
       compareAtPrice: product.compareAtPrice ? product.compareAtPrice + delta : undefined,
       qty,
@@ -101,11 +111,16 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
         <div>
           <div className="card relative aspect-square overflow-hidden">
             <Image
-              src={product.images[img]?.url || product.images[0]?.url || "/logo.png"}
-              alt={product.images[img]?.alt ?? product.name}
+              key={mainSrc}
+              src={mainSrc}
+              alt={current?.alt ?? product.name}
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
               priority
+              onError={() => {
+                if (current) markFailed(current.url);
+              }}
             />
             <div className="absolute left-3 top-3 flex gap-1.5">
               <ConditionBadge condition={product.condition} />
@@ -114,15 +129,15 @@ export default function ProductDetailClient({ product }: { product: ProductT }) 
               )}
             </div>
           </div>
-          {product.images.length > 1 && (
+          {liveImages.length > 1 && (
             <div className="mt-3 grid grid-cols-4 gap-2">
-              {product.images.map((im, i) => (
+              {liveImages.map((im) => (
                 <button
-                  key={i}
-                  onClick={() => setImg(i)}
-                  className={cn("relative aspect-square overflow-hidden rounded-xl border-2", img === i ? "border-brand-600" : "border-transparent")}
+                  key={im.url}
+                  onClick={() => setImgUrl(im.url)}
+                  className={cn("relative aspect-square overflow-hidden rounded-xl border-2", current?.url === im.url ? "border-brand-600" : "border-transparent")}
                 >
-                  <Image src={im.url} alt={im.alt} fill className="object-cover" />
+                  <Image src={im.url} alt={im.alt} fill sizes="(max-width: 1024px) 25vw, 12vw" className="object-cover" onError={() => markFailed(im.url)} />
                 </button>
               ))}
             </div>

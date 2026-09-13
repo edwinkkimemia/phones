@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Eye, GitCompareArrows, ShoppingCart } from "lucide-react";
@@ -17,19 +18,24 @@ export default function ProductCard({ product }: { product: ProductT }) {
   const inCompare = compareIds.includes(product.id);
 
   const url = `/${product.category}/${product.slug}`;
+  const [imgOk, setImgOk] = useState(true);
+  const imgUrl = product.images[0]?.url ?? "";
 
   return (
     <div className="card group relative flex flex-col overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:shadow-pop">
       <div className="relative aspect-square overflow-hidden bg-slate-50">
         <Link href={url} aria-label={product.name}>
-          <Image
-            src={product.images[0]?.url ?? ""}
-            alt={product.images[0]?.alt ?? product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
+          {imgOk && imgUrl ? (
+            <Image
+              src={imgUrl}
+              alt={product.images[0]?.alt ?? product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImgOk(false)}
+            />
+          ) : null}
         </Link>
         <div className="absolute left-2 top-2 flex flex-col gap-1.5">
           <ConditionBadge condition={product.condition} />

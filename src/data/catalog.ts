@@ -1240,7 +1240,7 @@ export const PRODUCTS: ProductT[] = [
     reviewCount: 58,
     soldCount: 324,
     isDeal: true,
-    images: [{ url: u("photo-1619641805639-52a3ecbce0bd"), alt: "Original HP laptop battery" }],
+    images: [{ url: u("photo-1518770660439-4636190af475"), alt: "Original HP laptop battery" }],
     specs: [
       { group: "General", key: "Model", value: "HP OA04 (HSTNN-LB5S)" },
       { group: "General", key: "Capacity", value: "14.8V 41Wh, 3-cell Li-ion" },
