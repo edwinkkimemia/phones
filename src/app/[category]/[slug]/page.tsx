@@ -1,21 +1,28 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProductDetailClient from "@/components/ProductDetailClient";
-import { PRODUCTS, getProduct } from "@/data/catalog";
+import { PRODUCTS } from "@/data/catalog";
+import { getProductBySlug } from "@/lib/catalog-server";
 import { productMetadata, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+
+// Static slugs pre-render at build; admin/DB products and DB edits resolve
+// at runtime. Revalidate often so rich-text description changes from /admin
+// appear on the storefront without a redeploy.
+export const dynamicParams = true;
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ category: p.category, slug: p.slug }));
 }
 
-export function generateMetadata({ params }: { params: { category: string; slug: string } }): Metadata {
-  const p = getProduct(params.slug);
+export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
+  const p = await getProductBySlug(params.slug);
   if (!p) return {};
   return productMetadata(p);
 }
 
-export default function ProductPage({ params }: { params: { category: string; slug: string } }) {
-  const p = getProduct(params.slug);
+export default async function ProductPage({ params }: { params: { category: string; slug: string } }) {
+  const p = await getProductBySlug(params.slug);
   if (!p) notFound();
   const jsonLd = productJsonLd(p);
   const crumbs = breadcrumbJsonLd([

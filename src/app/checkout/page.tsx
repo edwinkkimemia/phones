@@ -7,6 +7,7 @@ import { Smartphone, Lock, Loader2 } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { useSession } from "next-auth/react";
 import { getProduct } from "@/data/catalog";
+import type { ProductT } from "@/types";
 import { kes } from "@/lib/checkout-utils";
 import { toast } from "@/components/toast";
 
@@ -25,9 +26,48 @@ function CheckoutBody() {
   const cart = useCart();
 
   // Buy-Now single item support: /checkout?buy=slug&qty=2
+  // Static fast path + live API fallback so admin-created (DB-only)
+  // products work the same as catalog products.
   const buySlug = sp.get("buy");
   const buyQty = Math.max(1, Number(sp.get("qty") ?? 1));
-  const buyProduct = buySlug ? getProduct(buySlug) : undefined;
+  const staticBuy = buySlug ? getProduct(buySlug) : undefined;
+  const [liveBuy, setLiveBuy] = useState<ProductT | undefined>(undefined);
+  useEffect(() => {
+    if (buySlug && !staticBuy) {
+      fetch(`/api/products/${encodeURIComponent(buySlug)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          const p = d?.product;
+          if (!p) return;
+          setLiveBuy({
+            id: String(p.id ?? p.slug),
+            slug: String(p.slug),
+            name: String(p.name),
+            brand: typeof p.brand === "string" ? p.brand : (p.brand?.name ?? "Generic"),
+            brandSlug: typeof p.brand === "string" ? p.brand : (p.brand?.slug ?? "generic"),
+            category: ((typeof p.category === "string" ? p.category : (p.category?.slug ?? "accessories")) as ProductT["category"]),
+            categoryLabel: typeof p.category === "string" ? p.category : (p.category?.name ?? ""),
+            tagline: p.tagline ?? "",
+            description: typeof p.description === "string" ? p.description : "",
+            price: Number(p.price),
+            condition: p.condition ?? "NEW",
+            stockQty: Number(p.stockQty ?? 99),
+            stockStatus: p.stockStatus ?? "IN_STOCK",
+            rating: 0,
+            reviewCount: 0,
+            soldCount: 0,
+            images: Array.isArray(p.images) ? p.images.map((im: { url: string; alt?: string }) => ({ url: im.url, alt: im.alt ?? p.name })) : [],
+            specs: [],
+            seoTitle: "",
+            seoDescription: "",
+          });
+        })
+        .catch(() => null);
+    } else {
+      setLiveBuy(undefined);
+    }
+  }, [buySlug, staticBuy]);
+  const buyProduct = staticBuy ?? liveBuy;
 
   const items = useMemo(() => {
     if (buyProduct) {

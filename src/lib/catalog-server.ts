@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { CATEGORIES } from "@/data/catalog";
+import { CATEGORIES, getProduct as getStaticProduct } from "@/data/catalog";
 import type { CategoryT } from "@/types";
 import type { ProductT, CategorySlug } from "@/types";
 
@@ -57,6 +57,7 @@ export function toProductT(p: {
   category?: { name: string; slug: string } | null;
   images?: { url: string; alt?: string | null }[];
   specs?: { group: string; key: string; value: string }[];
+  variants?: { name: string; options: { value: string; priceDelta?: number }[] }[] | { name: string; value: string; priceDelta?: number | null }[];
 }): ProductT {
   return {
     id: p.id,
@@ -82,9 +83,70 @@ export function toProductT(p: {
     isBestSeller: p.isBestSeller,
     images: (p.images ?? []).map((i) => ({ url: i.url, alt: i.alt ?? p.name })),
     specs: (p.specs ?? []).map((s) => ({ group: s.group, key: s.key, value: s.value })),
+    variants: groupVariants(p.variants),
     seoTitle: p.seoTitle ?? `${p.name} Price in Kenya | PhoneLaptops`,
-    seoDescription: p.seoDescription ?? p.description.slice(0, 160),
+    seoDescription: p.seoDescription ?? stripHtml(p.description).slice(0, 160),
   };
+}
+
+// DB rows store variants flat (one row per value); the static catalog and
+// the storefront expect them grouped ({ name, options[] }). Accepts either
+// shape so both sources render identically.
+function groupVariants(
+  variants:
+    | { name: string; options: { value: string; priceDelta?: number }[] }[]
+    | { name: string; value: string; priceDelta?: number | null }[]
+    | undefined
+): ProductT["variants"] {
+  if (!variants || variants.length === 0) return undefined;
+  if ("options" in variants[0]) {
+    return variants as { name: string; options: { value: string; priceDelta?: number }[] }[];
+  }
+  const flat = variants as { name: string; value: string; priceDelta?: number | null }[];
+  const map = new Map<string, { value: string; priceDelta?: number }[]>();
+  for (const v of flat) {
+    if (!v?.name || !v?.value) continue;
+    if (!map.has(v.name)) map.set(v.name, []);
+    map.get(v.name)!.push({ value: v.value, priceDelta: v.priceDelta ?? 0 });
+  }
+  if (map.size === 0) return undefined;
+  return [...map.entries()].map(([name, options]) => ({ name, options }));
+}
+
+// Descriptions are HTML from the admin rich-text editor. Plain-text
+// consumers (SEO meta, JSON-LD fallbacks) must not leak tags.
+function stripHtml(html: string): string {
+  return (html ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+// Single product: live DB row first (what /admin saved, rich HTML intact),
+// static catalog as offline fallback. Used by the storefront PDP so admin
+// description formatting always shows.
+export async function getLiveProduct(slug: string): Promise<ProductT | null> {
+  try {
+    const row = await prisma.product.findUnique({
+      where: { slug },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
+        specs: true,
+        variants: true,
+        brand: true,
+        category: true,
+      },
+    });
+    if (!row) return null;
+    return toProductT({
+      ...row,
+      brand: row.brand,
+      category: row.category,
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function getProductBySlug(slug: string): Promise<ProductT | undefined> {
+  return (await getLiveProduct(slug)) ?? getStaticProduct(slug);
 }
 
 // Full data for an admin-created category slug (unknown to the static

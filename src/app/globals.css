@@ -118,11 +118,14 @@ body {
   }
 }
 
-/* Admin-managed rich text (product descriptions, content blocks) */
+/* Admin-managed rich text (product descriptions, content blocks).
+   The editor uses document.execCommand, which emits <b>/<i>/<u> and bare
+   <div>s — all covered here so storefront matches what /admin shows. */
 .richtext {
   @apply text-[15px] leading-relaxed text-slate-600;
 }
-.richtext p {
+.richtext p,
+.richtext div {
   @apply mb-3;
 }
 .richtext ul {
@@ -131,13 +134,35 @@ body {
 .richtext ol {
   @apply mb-3 list-decimal space-y-1.5 pl-5;
 }
-.richtext strong {
+.richtext li {
+  @apply leading-relaxed;
+}
+.richtext strong,
+.richtext b {
   @apply font-bold text-slate-900;
+}
+.richtext em,
+.richtext i {
+  @apply italic;
+}
+.richtext u {
+  @apply underline underline-offset-2;
 }
 .richtext a {
   @apply font-semibold text-brand-700 underline;
 }
+.richtext h1,
+.richtext h2,
 .richtext h3,
 .richtext h4 {
   @apply mb-2 mt-4 font-bold text-slate-900;
+}
+.richtext h1 {
+  @apply text-xl;
+}
+.richtext h2 {
+  @apply text-lg;
+}
+.richtext blockquote {
+  @apply mb-3 border-l-4 border-slate-200 pl-4 italic text-slate-500;
 }
